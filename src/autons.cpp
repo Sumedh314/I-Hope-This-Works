@@ -48,6 +48,14 @@ void red_right() {
 	drive.drive_distance(30);
 }
 
+void blue_left() {
+
+}
+
+void blue_right() {
+	
+}
+
 void skills_autonomous() {
 
 	//score preload on goal

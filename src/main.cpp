@@ -14,6 +14,10 @@ Drive drive(
 	drive_pid, turn_pid, controller
 );
 
+// Auton number for auton selection
+int auton_index = 0;
+const char* autons[5] = {"Red left", "Red right", "Blue left", "Blue right", "Skills"};
+
 /**
  * A callback function for LLEMU's center button.
  *
@@ -73,7 +77,25 @@ void disabled() {
  * starts.
  */
 void competition_initialize() {
-	int auton = 0;
+
+	// Use the position of the intake to choose an autonomous routine.
+	intake.set_zero_position(0);
+	while (true) {
+		auton_index = floor(intake.get_position() / 90.0);
+
+		// Auton will just drive forward if no options are selected. Prints the choice to the bran and controller.
+		if (auton_index > 4 || auton_index < 0) {
+			pros::lcd::print(0, "Auton: drive forward 10 inches");
+			controller.print(0, 0, "Auton: drive forward");
+		}
+
+		// Print the auton choice to the brain and controller.
+		else {
+			pros::lcd::print(0, "Auton: %s", autons[auton_index]);
+			controller.print(0, 0, "Auton: %s", autons[auton_index]);
+		}
+		pros::delay(50);
+	}
 }
 
 /**
@@ -88,9 +110,27 @@ void competition_initialize() {
  * from where it left off.
  */
 void autonomous() {
-	// drive_for(15);
-	red_left();
-	// skills_autonomous();	
+	
+	// Execute the correct autonomous routine based on what was chosen in the competition_initialize() function.
+	switch (auton_index) {
+		case 0:
+			red_left();
+			break;
+		case 1:
+			red_right();
+			break;
+		case 2:
+			blue_left();
+		case 3:
+			blue_right();
+			break;
+		case 4:
+			skills_autonomous();
+			break;
+		default:
+			drive.drive_distance(10);
+			break;
+	}
 }
 
 /**
