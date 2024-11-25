@@ -73,7 +73,7 @@ void disabled() {
  * starts.
  */
 void competition_initialize() {
-	
+	int auton = 0;
 }
 
 /**
