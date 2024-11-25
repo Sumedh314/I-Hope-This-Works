@@ -10,7 +10,8 @@ Drive::Drive(
     const double DRIVE_WHEEL_DIAMETER, const double TRACK_WIDTH, const double LEFT_OFFSET, const double HORIZONTAL_OFFSET,
     const double MOTOR_GEAR_TEETH, const double WHEEL_GEAR_TEETH, const double TRACKING_WHEEL_DIAMETER, pros::Motor& front_left,
     pros::Motor& middle_left, pros::Motor& back_left, pros::Motor& front_right, pros::Motor& middle_right, pros::Motor& back_right,
-    pros::IMU& inertial, pros::adi::Encoder& vertical, pros::adi::Encoder& horizontal, PID drive_pid, PID turn_pid, pros::Controller& controller
+    pros::IMU& inertial, pros::adi::Encoder& vertical, pros::adi::Encoder& horizontal, pros::Controller& controller,
+    PID drive_pid, PID turn_pid
 ) :
     DRIVE_WHEEL_DIAMETER(DRIVE_WHEEL_DIAMETER),
     TRACK_WIDTH(TRACK_WIDTH),
@@ -28,9 +29,9 @@ Drive::Drive(
     inertial(inertial),
     vertical(vertical),
     horizontal(horizontal),
+    controller(controller),
     drive_pid(drive_pid),
-    turn_pid(turn_pid),
-    controller(controller)
+    turn_pid(turn_pid)
 {
     Point(0, 0);
 }
@@ -86,7 +87,7 @@ void Drive::split_arcade() {
  * Uses the PID class to drive a certain distance. First accelerates to full speed smoothly and then begins the PID.
  * TODO: figure out correct PID constants.
 */
-void Drive::drive_distance(double target, double max_voltage, double settle_error, double max_acceleration) {
+void Drive::drive_distance(double target, double max_voltage, double max_acceleration) {
     double error = target;
     double prev_error = target;
     double voltage = sign(error);
@@ -148,15 +149,6 @@ void Drive::turn_to_heading(double target, double max_voltage, double max_accele
     double error = target - position;
     double voltage = sign(error);
 
-    // double kP = 0;
-    // if (fabs(error) <= 95) {
-    //     kP = 1.6;
-    // }
-    // else {
-    //     kP = 1;
-    // }
-    // double kD = 0;
-
     // Accelerates at the beginning using the max acceleration. This is something our PID does not do, so we need to do
     // it separately.
     while (fabs(voltage) < max_voltage) {
@@ -201,7 +193,7 @@ void Drive::turn_to_heading(double target, double max_voltage, double max_accele
 /**
  * Uses PID and odometry to drive the robot to a point.
 */
-void Drive::drive_to_point(double target_x, double target_y) {
+void Drive::drive_to_point(double target_x, double target_y, double max_drive_voltage, double max_turn_voltage) {
 
     // Set error to be a big number so the PID is not settled and the while loop will start.
     drive_pid.set_error(100);
@@ -230,6 +222,14 @@ void Drive::drive_to_point(double target_x, double target_y) {
 
         // Scale the drive voltage to be smaller based on how much the robot is facing the target.
         drive_voltage *= cos(deg_to_rad(turn_error));
+
+        // Keep the max voltages within the limits given by the parameters.
+        if (fabs(drive_voltage) > max_drive_voltage) {
+            drive_voltage = max_drive_voltage * sign(drive_voltage);
+        }
+        if (fabs(turn_voltage) > max_turn_voltage) {
+            turn_voltage = max_turn_voltage * sign(turn_voltage);
+        }
 
         // Move the robot and delay for next loop.
         set_drive_voltages(drive_voltage - turn_voltage, drive_voltage + turn_voltage);
@@ -291,17 +291,17 @@ void Drive::update_odometry() {
 }
 
 /**
+ * Sets the heading of the robot when it starts the match.
+*/
+void Drive::set_original_heading(double original_heading) {
+    this->original_heading = original_heading;
+}
+
+/**
  * Returns the heading of the robot. The reading from the sensor is scaled a little bit because these sensors usually
  * do not return exactly 360 when spun around 360 degrees. This scaling factor was determined experimentally by
  * spinning the robot around a lot and seeing what the reading was.
 */
 double Drive::get_heading() {
     return original_heading - inertial.get_rotation() * 3600 / 3595;
-}
-
-/**
- * Sets the heading of the robot when it starts the match.
-*/
-void Drive::set_original_heading(double original_heading) {
-    this->original_heading = original_heading;
 }

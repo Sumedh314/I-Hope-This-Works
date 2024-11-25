@@ -7,11 +7,11 @@
 
 // Create PID and drivetrain objects used for the rest of the code.
 PID drive_pid(20.5, 0, 1.7, 5, 1, 0.02, 4000, 0.01);
-PID turn_pid(1.6, 0, 0, 15, 2, 0.2, 4000, 0.01);
+PID turn_pid(1.3, 0, 0, 15, 2, 0.2, 4000, 0.01);
 Drive robot(
 	3.25, 7, 0, 2.25, 36, 60, 2.8,
 	front_left, middle_left, back_left, front_right, middle_right, back_right, inertial, vertical, horizontal,
-	drive_pid, turn_pid, controller
+	controller, drive_pid, turn_pid
 );
 
 // Auton number for auton selection
@@ -171,16 +171,17 @@ void opcontrol() {
 	// The robot starts facing 90 degrees (forward).
 	robot.set_original_heading(90);
 
-	// Calibrate inertial sensor and wait for it to calibrate.
-	inertial.reset();
-	pros::delay(3000);
-
 	// Start tasks.
-	pros::Task odom([](){robot.update_odometry();});
 	pros::Task spin(spin_intake);
 	pros::Task toggle(toggle_clamp);
-	pros::Task print(print_odom);
+	pros::Task drive([](){robot.split_arcade();});
 
-	// Drive the robot from the controller using split arcade.
-	robot.split_arcade();
+	// Calibrate inertial sensor, wait for it to calibrate, and start odometry after a button on the controller is pressed.
+	while (!controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)) {
+		pros::delay(50);
+	}
+	inertial.reset();
+	pros::delay(3000);
+	pros::Task odom([](){robot.update_odometry();});
+	pros::Task print(print_odom);
 }
