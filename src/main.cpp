@@ -1,8 +1,8 @@
 #include "main.h"
-#include "robot-config.hpp"
-#include "drive.hpp"
-#include "intake.hpp"
-#include "pneumatics.hpp"
+#include "robot_subsystems/robot-config.hpp"
+#include "robot_subsystems/drive.hpp"
+#include "robot_subsystems/intake.hpp"
+#include "robot_subsystems/pneumatics.hpp"
 #include "autons.hpp"
 
 // Create PID and drivetrain objects used for the rest of the code.

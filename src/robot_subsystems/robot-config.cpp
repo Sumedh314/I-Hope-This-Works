@@ -1,5 +1,5 @@
 #include "main.h"
-#include "robot-config.hpp"
+#include "robot_subsystems/robot-config.hpp"
 
 // Motors
 pros::Motor front_left(-11, pros::v5::MotorGearset::blue, pros::v5::MotorEncoderUnits::degrees);

@@ -1,6 +1,6 @@
 #include "main.h"
 #include "util.hpp"
-#include "drive.hpp"
+#include "robot_subsystems/drive.hpp"
 #include "pid.hpp"
 
 /**
@@ -142,28 +142,13 @@ void Drive::drive_distance(double target, double max_voltage, double max_acceler
 /**
  * Uses the PID class to turn to a certain heading. First accelerates to full speed smoothly and then begins the PID.
  * TODO: figure out correct PID constants.
+ * TODO: unbounded heading might cause problems.
 */
 void Drive::turn_to_heading(double target, double max_voltage, double max_acceleration) {
     double prev_error = target;
     double position = get_heading();
-    double error = target - position;
+    double error = reduce_negative_180_to_180(target - position);
     double voltage = sign(error);
-
-    // Accelerates at the beginning using the max acceleration. This is something our PID does not do, so we need to do
-    // it separately.
-    while (fabs(voltage) < max_voltage) {
-
-        // Increase by max acceleration in the intended direction
-        voltage += max_acceleration * sign(voltage);
-
-        // Set motor voltages.
-        set_drive_voltages(-voltage, voltage);
-        
-        // Update position and previous error to the current error.
-        position = get_heading();
-        prev_error = target - position;
-        pros::delay(10);
-    }
 
     // Figure out current error and set it to the PID.
     error = target - position;
