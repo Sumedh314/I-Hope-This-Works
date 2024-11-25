@@ -4,7 +4,7 @@
 #include "pid.hpp"
 #include "point.hpp"
 
-class Drive {
+class Drive : public Point{
     
     // Constants related to the drivetrain. Distances are in inches.
     const double DRIVE_WHEEL_DIAMETER;
@@ -14,10 +14,6 @@ class Drive {
     const int MOTOR_GEAR_TEETH;
     const int WHEEL_GEAR_TEETH;
     const double TRACKING_WHEEL_DIAMETER;
-
-    // Coordinates of the robot updated using odometry.
-    double x_coor = 0;
-    double y_coor = 0;
     
     // The heading the robot starts at in the beginning of the match.
     double original_heading = 0;
@@ -57,8 +53,7 @@ class Drive {
         void turn_to_heading(double degrees, double max_voltage = 127, double max_acceleration = 6);
         void drive_to_point(double x, double y);
         void update_odometry();
-        double get_x();
-        double get_y();
+        void set_coordinates(double new_x, double new_y);
         double get_heading();
         void set_original_heading(double new_original_heading);
         Point get_position();

@@ -8,7 +8,7 @@
 // Create PID and drivetrain objects used for the rest of the code.
 PID drive_pid(20.5, 0, 1.7, 5, 1, 0.02, 4000, 0.01);
 PID turn_pid(1.6, 0, 0, 15, 2, 0.2, 4000, 0.01);
-Drive drive(
+Drive robot(
 	3.25, 7, 0, 2.25, 36, 60, 2.8,
 	front_left, middle_left, back_left, front_right, middle_right, back_right, inertial, vertical, horizontal,
 	drive_pid, turn_pid, controller
@@ -128,7 +128,7 @@ void autonomous() {
 			skills_autonomous();
 			break;
 		default:
-			drive.drive_distance(10);
+			robot.drive_distance(10);
 			break;
 	}
 }
@@ -138,11 +138,11 @@ void autonomous() {
 */
 void print_odom() {
 	while (true) {
-        controller.print(0, 0, "X coor: %f", drive.get_x());
+        controller.print(0, 0, "X coor: %f", robot.get_x());
         pros::delay(50);
-        controller.print(1, 0, "Y coor: %f", drive.get_y());
+        controller.print(1, 0, "Y coor: %f", robot.get_y());
         pros::delay(50);
-        controller.print(2, 0, "Heading: %f", drive.get_heading());
+        controller.print(2, 0, "Heading: %f", robot.get_heading());
         pros::delay(50);
 	}
 }
@@ -169,18 +169,18 @@ void print_odom() {
  */
 void opcontrol() {
 	// The robot starts facing 90 degrees (forward).
-	drive.set_original_heading(90);
+	robot.set_original_heading(90);
 
 	// Calibrate inertial sensor and wait for it to calibrate.
 	inertial.reset();
 	pros::delay(3000);
 
 	// Start tasks.
-	pros::Task odom([](){drive.update_odometry();});
+	pros::Task odom([](){robot.update_odometry();});
 	pros::Task spin(spin_intake);
 	pros::Task toggle(toggle_clamp);
 	pros::Task print(print_odom);
 
 	// Drive the robot from the controller using split arcade.
-	drive.split_arcade();
+	robot.split_arcade();
 }

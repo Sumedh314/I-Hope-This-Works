@@ -330,8 +330,8 @@ void Drive::update_odometry() {
         double average_heading = current_heading - change_in_heading / 2;
 
         // Change x and y coordinates using the local x and y offsets.
-        x_coor += local_y_offset * cos(average_heading) + local_x_offset * sin(average_heading);
-        y_coor += local_y_offset * sin(average_heading) - local_x_offset * cos(average_heading);
+        set_x(get_x() + local_y_offset * cos(average_heading) + local_x_offset * sin(average_heading));
+        set_y(get_y() + local_y_offset * sin(average_heading) - local_x_offset * cos(average_heading));
 
         // Reset values for next loop.
         prev_vertical = current_vertical;
@@ -342,20 +342,6 @@ void Drive::update_odometry() {
         // iterations. This is to keep consistency.
         pros::Task::delay_until(&start, 10);
     }
-}
-
-/**
- * Returns the x coordinate of the robot.
-*/
-double Drive::get_x() {
-    return x_coor;
-}
-
-/**
- * Returns the y coordinate of the robot.
-*/
-double Drive::get_y() {
-    return y_coor;
 }
 
 /**

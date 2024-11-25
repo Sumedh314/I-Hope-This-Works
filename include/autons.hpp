@@ -1,7 +1,7 @@
 #include "main.h"
 #include "drive.hpp"
 
-extern Drive drive;
+extern Drive robot;
 
 void red_left();
 void red_right();
