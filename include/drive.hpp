@@ -48,14 +48,11 @@ class Drive : public Point{
         void set_drive_voltages(double voltage);
         void brake();
         void split_arcade();
-        void trapezoid_motion_profile(double displacement, double max_acceleration = 3);
         void drive_distance(double target, double max_voltage = 127, double settle_error = 1, double max_acceleration = 6);
         void turn_to_heading(double degrees, double max_voltage = 127, double max_acceleration = 6);
-        void drive_to_point(double x, double y);
+        void drive_to_point(double target_x, double target_y);
         void update_odometry();
-        void set_coordinates(double new_x, double new_y);
         double get_heading();
         void set_original_heading(double new_original_heading);
-        Point get_position();
 };
 #endif

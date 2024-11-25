@@ -17,23 +17,23 @@ Point::Point(double x, double y) :
 /**
  * Sets the x value for this point.
 */
-void Point::set_x(double new_x) {
-    x = new_x;
+void Point::set_x(double x) {
+    this->x = x;
 }
 
 /**
  * Sets the y value for this point.
 */
-void Point::set_y(double new_y) {
-    y = new_y;
+void Point::set_y(double y) {
+    this->y = y;
 }
 
 /**
  * Sets the coordinates of the robot.
 */
-void Point::set_coordinates(double new_x, double new_y) {
-    x = new_x;
-    y = new_y;
+void Point::set_coordinates(double x, double y) {
+    this->x = x;
+    this->y = y;
 }
 
 /**

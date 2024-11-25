@@ -31,7 +31,9 @@ Drive::Drive(
     drive_pid(drive_pid),
     turn_pid(turn_pid),
     controller(controller)
-{}
+{
+    Point(0, 0);
+}
 
 /**
  * Sets the voltages of the drivetrain motors. the PROS motor.move() function takes in a value from -127 to 127 and
@@ -78,64 +80,6 @@ void Drive::split_arcade() {
         set_drive_voltages(left_voltage, right_voltage);
         pros::delay(30);
     }
-}
-
-/**
- * Given a distance to drive, it calculates how much time it can accelerate, go at full speed, and then decelerate
- * to drive that distance. Doesn't work well, but creates a very smooth motion.
-*/
-void Drive::trapezoid_motion_profile(double displacement, double max_acceleration) {
-    double distance = fabs(displacement);
-
-    double voltage = 0;
-    // double max_rpm = 732;
-    double max_rpm = 640;
-    double max_speed = max_rpm * MOTOR_GEAR_TEETH / WHEEL_GEAR_TEETH * DRIVE_WHEEL_DIAMETER * pi / 60;
-    double acceleration_time = 127 / max_acceleration / 100;
-    double acceleration = max_speed / acceleration_time;
-    double distance_accelerated = 0.5 * acceleration * pow(acceleration_time, 2);
-    double wait_distance = distance - 2 * distance_accelerated;
-    double wait_time = wait_distance / max_speed;
-
-    if (wait_distance < 0) {
-        acceleration_time -= fabs(wait_time) / 2;
-        wait_time = 0;
-    }
-
-    printf("Max speed: %f\n", max_speed);
-    printf("Acceleration time: %f\n", acceleration_time);
-    printf("Acceleration: %f\n", acceleration);
-    printf("Distance accelerated: %f\n", distance_accelerated);
-    printf("Wait distance: %f\n", wait_distance);
-    printf("Wait time: %f\n", wait_time);
-
-    if (displacement < 0) {
-        max_acceleration *= -1;
-    }
-
-    double start = pros::millis() / 1000.0;
-	while (pros::millis() / 1000.0 < start + acceleration_time) {
-		voltage += max_acceleration;
-		set_drive_voltages(voltage);
-        printf("%f\n", voltage);
-		pros::delay(10);
-	}
-
-    start = pros::millis() / 1000.0;
-    while (pros::millis() / 1000.0 < start + wait_time) {
-        printf("%f\n", voltage);
-        pros::delay(10);
-    }
-    
-    start = pros::millis() / 1000.0;
-	while (pros::millis() / 1000.0 < start + acceleration_time) {
-		voltage -= max_acceleration;
-		set_drive_voltages(voltage);
-        printf("%f\n", voltage);
-		pros::delay(10);
-	}
-    printf("Voltage: %f\n", voltage);
-	brake();
 }
 
 /**
@@ -257,20 +201,22 @@ void Drive::turn_to_heading(double target, double max_voltage, double max_accele
 /**
  * Uses PID and odometry to drive the robot to a point.
 */
-void Drive::drive_to_point(double x, double y) {
+void Drive::drive_to_point(double target_x, double target_y) {
 
     // Set error to be a big number so the PID is not settled and the while loop will start.
     drive_pid.set_error(100);
 
     // Make the target a Point object.
-    Point target(x, y);
+    Point target(target_x, target_y);
 
     // Keep going until the robot is settled, either by reaching the desired point or by getting stuck for too long.
     while (!drive_pid.is_settled()) {
         
         // Find errors in the distance and angle it needs to turn to to get to the desired point.
-        double lateral_error = distance_between_points(get_position(), target);
-        double turn_error = reduce_negative_180_to_180(rad_to_deg(atan2(y - get_y(), x - get_x()) - deg_to_rad(get_heading())));
+        double lateral_error = distance_between_points(*this, target);
+        double turn_error = reduce_negative_180_to_180(
+            rad_to_deg(atan2(target.get_y() - y, target.get_x() - x) - deg_to_rad(get_heading()))
+        );
 
         // Reverse turning and driving if it's faster for the robot to drive backwards.
         if (fabs(turn_error) > 90) {
@@ -330,8 +276,8 @@ void Drive::update_odometry() {
         double average_heading = current_heading - change_in_heading / 2;
 
         // Change x and y coordinates using the local x and y offsets.
-        set_x(get_x() + local_y_offset * cos(average_heading) + local_x_offset * sin(average_heading));
-        set_y(get_y() + local_y_offset * sin(average_heading) - local_x_offset * cos(average_heading));
+        x += local_y_offset * cos(average_heading) + local_x_offset * sin(average_heading);
+        y += local_y_offset * sin(average_heading) - local_x_offset * cos(average_heading);
 
         // Reset values for next loop.
         prev_vertical = current_vertical;
@@ -345,23 +291,17 @@ void Drive::update_odometry() {
 }
 
 /**
- * Returns the heading of the robot.
+ * Returns the heading of the robot. The reading from the sensor is scaled a little bit because these sensors usually
+ * do not return exactly 360 when spun around 360 degrees. This scaling factor was determined experimentally by
+ * spinning the robot around a lot and seeing what the reading was.
 */
 double Drive::get_heading() {
-    // The reading from the sensor is scaled a little bit because these sensors usually do not return exactly 360 when
-    // spun around 360 degrees. This scaling factor was determined experimentally by spinning the robot around a lot
-    // and seeing what the reading was.
     return original_heading - inertial.get_rotation() * 3600 / 3595;
 }
 
 /**
  * Sets the heading of the robot when it starts the match.
 */
-void Drive::set_original_heading(double new_original_heading) {
-    original_heading = new_original_heading;
-}
-
-Point Drive::get_position() {
-    Point position(get_x(), get_y());
-    return position;
+void Drive::set_original_heading(double original_heading) {
+    this->original_heading = original_heading;
 }
