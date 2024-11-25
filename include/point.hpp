@@ -1,3 +1,5 @@
+#ifndef POINT_HPP
+#define POINT_HPP
 #include "main.h"
 
 class Point {
@@ -13,3 +15,4 @@ class Point {
         double get_x();
         double get_y();
 };
+#endif

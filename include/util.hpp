@@ -1,4 +1,5 @@
 #include "main.h"
+#include "point.hpp"
 
 // Pi
 const double pi = 3.14159265358979;
