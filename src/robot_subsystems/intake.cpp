@@ -16,7 +16,7 @@ void spin_intake() {
 	}
 }
 
-void intake_on(double voltage = 127) {
+void intake_on(double voltage) {
 	intake.move(voltage);
 }
 

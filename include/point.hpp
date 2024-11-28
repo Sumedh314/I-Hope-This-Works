@@ -8,7 +8,7 @@ class Point {
         double y = 0;
 
     public:
-        Point();
+        // Point();
         Point(double x, double y);
 
         void set_x(double x);

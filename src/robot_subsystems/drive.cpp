@@ -4,7 +4,8 @@
 #include "pid.hpp"
 
 /**
- * Creates a new Drive object with constant values.
+ * Creates a new Drive object with constant values representing its dimensions, values related to tracking wheels,
+ * information about electronics it uses, and PID objects.
 */
 Drive::Drive(
     const double DRIVE_WHEEL_DIAMETER, const double TRACK_WIDTH, const double LEFT_OFFSET, const double HORIZONTAL_OFFSET,
@@ -31,9 +32,10 @@ Drive::Drive(
     horizontal(horizontal),
     controller(controller),
     drive_pid(drive_pid),
-    turn_pid(turn_pid)
+    turn_pid(turn_pid),
+    Point(0, 0)
 {
-    Point(0, 0);
+    // Set the initial position to (0, 0)
 }
 
 /**
@@ -144,29 +146,25 @@ void Drive::drive_distance(double target, double max_voltage, double max_acceler
  * TODO: figure out correct PID constants.
  * TODO: unbounded heading might cause problems.
 */
-void Drive::turn_to_heading(double target, double max_voltage, double max_acceleration) {
-    double prev_error = target;
-    double position = get_heading();
-    double error = reduce_negative_180_to_180(target - position);
-    double voltage = sign(error);
-
-    // Figure out current error and set it to the PID.
-    error = target - position;
-    turn_pid.set_error(error);
+void Drive::turn_to_heading(double target, double max_voltage) {
+    
+    // Set the error to be a big number so the PID isn't settled.
+    turn_pid.set_error(100);
 
     // Keep going until the robot is settled, either by reaching the desired distance or by getting stuck for too long.
     while (!turn_pid.is_settled()) {
+
         // Get the current error and feet it into the PID controller.
-        position = get_heading();
-        error = target - position;
-        voltage = turn_pid.compute(error);
+        double position = get_heading();
+        double error = reduce_negative_180_to_180(target - position);
+        double voltage = turn_pid.compute(error);
 
         // Clamp the voltage to the maximum voltage.
         if (fabs(voltage) > max_voltage) {
             voltage = max_voltage * sign(voltage);
         }
 
-        // Output voltage and delay for next loop.
+        // Output voltages and delay for next loop.
         set_drive_voltages(-voltage, voltage);
         pros::delay(10);
     }
@@ -177,6 +175,7 @@ void Drive::turn_to_heading(double target, double max_voltage, double max_accele
 
 /**
  * Uses PID and odometry to drive the robot to a point.
+ * TODO: Figure out correct PID constants.
 */
 void Drive::drive_to_point(double target_x, double target_y, double max_drive_voltage, double max_turn_voltage) {
 
@@ -270,15 +269,18 @@ void Drive::update_odometry() {
         prev_heading = current_heading;
 
         // Using delay_until() to ensure exactly 10 milliseconds for each iteration instead of 10 milliseconds between
-        // iterations. This is to keep consistency.
+        // iterations. For example, if this loop took 2 milliseconds to run, it would only wait 8 milliseconds before
+        // the next loop instead of 10. This is to make it more consistent.
         pros::Task::delay_until(&start, 10);
     }
 }
 
 /**
- * Sets the heading of the robot when it starts the match.
+ * Sets the heading of the robot when it starts the match. Should only be used at the beginning of the match becuase
+ * the inertial sensor's reading will also be reset (but not recalibrated).
 */
 void Drive::set_original_heading(double original_heading) {
+    inertial.set_rotation(0);
     this->original_heading = original_heading;
 }
 

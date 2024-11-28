@@ -4,7 +4,7 @@
 /**
  * Creates a new Point object with no default coordinates.
 */
-Point::Point() {}
+// Point::Point() {}
 
 /**
  * Creates a new Point object with default coordinates.

@@ -14,9 +14,9 @@ Drive robot(
 	controller, drive_pid, turn_pid
 );
 
-// Auton number for auton selection
+// Auton number for auton selection and auton choices.
 int auton_index = 0;
-const char* autons[5] = {"Red left", "Red right", "Blue left", "Blue right", "Skills"};
+const char* autons[5] = {"red left", "red right", "blue left", "blue right", "skills"};
 
 /**
  * A callback function for LLEMU's center button.
@@ -54,8 +54,6 @@ void initialize() {
 	back_right.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
 
 	intake.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-
-	inertial.reset();
 }
 
 /**
@@ -64,6 +62,7 @@ void initialize() {
  * the robot is enabled, this task will exit.
  */
 void disabled() {
+	// Make sure the robot isn't holding onto a goal at the end of the match.
 	unclamp_goal();
 }
 
@@ -78,13 +77,37 @@ void disabled() {
  */
 void competition_initialize() {
 
-	// Use the position of the intake to choose an autonomous routine.
+	// Use the position of the intake to choose an autonomous routine. This is better than having separate programs for
+	// each autonomous routine because we don't have to manage multiple programs.
 	intake.set_zero_position(0);
+
 	while (true) {
+		
+		// Each range of 90 degrees for the intake has a different auton_index
 		auton_index = floor(intake.get_position() / 90.0);
 
-		// Auton will just drive forward if no options are selected. Prints the choice to the bran and controller.
-		if (auton_index > 4 || auton_index < 0) {
+		// Auton will do nothing if the intake is too far backward.
+		if (auton_index < -1) {
+			pros::lcd::print(0, "Auton will do nothing.");
+			controller.print(0, 0, "Auton: nothing.");
+		}
+
+		// Calibrate sensor if intake moves backwards.
+		else if (auton_index < 0) {
+			pros::lcd::print(0, "Calibrating IMU...");
+			controller.print(0, 0, "Calibrating IMU...");
+			inertial.reset(true);
+			pros::lcd::print(0, "Done calibrating");
+			controller.print(0, 0, "Done calibrating");
+
+			// Wait until the intake is in a different position.
+			while (floor(intake.get_position() / 90.0) < 0 && floor(intake.get_position() / 90.0) >= -1) {
+				pros::delay(50);
+			}
+		}
+
+		// Auton will just drive forward if intake is too far forward. Prints the choice to the bran and controller.
+		else if (auton_index > sizeof(autons) / sizeof(const char*)) {
 			pros::lcd::print(0, "Auton: drive forward 10 inches");
 			controller.print(0, 0, "Auton: drive forward");
 		}
@@ -110,6 +133,14 @@ void competition_initialize() {
  * from where it left off.
  */
 void autonomous() {
+
+	// Set the autonomous index for the extreme cases for the intake.
+	if (auton_index > 5) {
+		auton_index = 5;
+	}
+	else if (auton_index < -1) {
+		auton_index = -1;
+	}
 	
 	// Execute the correct autonomous routine based on what was chosen in the competition_initialize() function.
 	switch (auton_index) {
@@ -127,8 +158,10 @@ void autonomous() {
 		case 4:
 			skills_autonomous();
 			break;
-		default:
+		case 5:
 			robot.drive_distance(10);
+			break;
+		default:
 			break;
 	}
 }

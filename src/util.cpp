@@ -17,25 +17,6 @@ double rad_to_deg(double angle) {
 }
 
 /**
- * Calculates the distance between two points using the Pythagorean Theorem
-*/
-double distance_between_points(Point first, Point second) {
-    return sqrt(pow(second.get_x() - first.get_x(), 2) + pow(second.get_y() - first.get_y(), 2));
-}
-
-/**
- * Returns whether a number is positive or negative.
-*/
-double sign(double num) {
-    if (num >= 0) {
-        return 1;
-    }
-    else {
-        return -1;
-    }
-}
-
-/**
  * Makes an angle between 0 and 360 degrees while keeping the same value mod 360.
 */
 double reduce_0_to_360(double angle) {
@@ -63,4 +44,23 @@ double reduce_negative_180_to_180(double angle) {
     }
 
     return angle;
+}
+
+/**
+ * Returns whether a number is positive or negative.
+*/
+double sign(double num) {
+    if (num >= 0) {
+        return 1;
+    }
+    else {
+        return -1;
+    }
+}
+
+/**
+ * Calculates the distance between two points using the Pythagorean Theorem
+*/
+double distance_between_points(Point first, Point second) {
+    return sqrt(pow(second.get_x() - first.get_x(), 2) + pow(second.get_y() - first.get_y(), 2));
 }

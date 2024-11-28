@@ -16,7 +16,7 @@ class Drive : public Point{
     const double TRACKING_WHEEL_DIAMETER;
     
     // The heading the robot starts at in the beginning of the match.
-    double original_heading = 0;
+    double original_heading;
 
     // The hardware used in this drivetrain.
     // I have no idea if this will work or not. ChatGPT said to put the & symbol to pass by reference.
@@ -50,7 +50,7 @@ class Drive : public Point{
         void brake();
         void split_arcade();
         void drive_distance(double target, double max_voltage = 127, double max_acceleration = 6);
-        void turn_to_heading(double degrees, double max_voltage = 127, double max_acceleration = 6);
+        void turn_to_heading(double degrees, double max_voltage = 127);
         void drive_to_point(double target_x, double target_y, double max_drive_voltage = 127, double max_turn_voltage = 127);
         void update_odometry();
         void set_original_heading(double new_original_heading);
