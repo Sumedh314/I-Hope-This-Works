@@ -48,6 +48,7 @@ double reduce_negative_180_to_180(double angle) {
 
 /**
  * Returns whether a number is positive or negative.
+ * IMPORTANT: Returns 1 if the number is 0.
 */
 double sign(double num) {
     if (num >= 0) {
@@ -56,6 +57,32 @@ double sign(double num) {
     else {
         return -1;
     }
+}
+
+/**
+ * Makes a value be within a given range.
+*/
+double clamp(double value, double min_value, double max_value) {
+    if (value < min_value) {
+        return min_value;
+    }
+    if (value > max_value) {
+        return max_value;
+    }
+    return value;
+}
+
+/**
+ * Makes a value be within a given range where the bounds are the positive and negative value of max_range.
+*/
+double clamp(double value, double max_range) {
+    if (value < -max_range) {
+        return -max_range;
+    }
+    if (value > max_range) {
+        return max_range;
+    }
+    return value;
 }
 
 /**

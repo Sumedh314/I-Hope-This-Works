@@ -3,15 +3,17 @@
 #include "robot_subsystems/drive.hpp"
 #include "robot_subsystems/intake.hpp"
 #include "robot_subsystems/pneumatics.hpp"
+#include "util.hpp"
 #include "autons.hpp"
 
 // Create PID and drivetrain objects used for the rest of the code.
-PID drive_pid(20.5, 0, 1.7, 5, 1, 0.02, 4000, 0.01);
+PID drive_pid_IME(20.5, 0, 1.7, 5, 1, 0.02, 4000, 0.01);
+PID drive_pid(0, 0, 0, 5, 1, 0.02, 4000, 0.01);
 PID turn_pid(1.3, 0, 0, 15, 2, 0.2, 4000, 0.01);
 Drive robot(
 	3.25, 7, 0, 2.25, 36, 60, 2.8,
 	front_left, middle_left, back_left, front_right, middle_right, back_right, inertial, vertical, horizontal,
-	controller, drive_pid, turn_pid
+	controller, drive_pid_IME, drive_pid, turn_pid
 );
 
 // Auton number for auton selection and auton choices.
@@ -107,7 +109,7 @@ void competition_initialize() {
 			}
 		}
 
-		// Auton will just drive forward if intake is too far forward. Prints the choice to the bran and controller.
+		// Auton will just drive forward if intake is too far forward. Prints the choice to the brain and controller.
 		else if (auton_index > sizeof(autons) / sizeof(const char*)) {
 			pros::lcd::print(0, "Auton: drive forward 10 inches");
 			controller.print(0, 0, "Auton: drive forward");
@@ -136,12 +138,7 @@ void competition_initialize() {
 void autonomous() {
 
 	// Set the autonomous index for the extreme cases for the intake.
-	if (auton_index > 5) {
-		auton_index = 5;
-	}
-	else if (auton_index < -1) {
-		auton_index = -1;
-	}
+	auton_index = clamp(auton_index, -1, 5);
 	
 	// Execute the correct autonomous routine based on what was chosen in the competition_initialize() function.
 	switch (auton_index) {

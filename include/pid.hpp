@@ -43,7 +43,6 @@ class PID {
 
     public:
         PID(double kP, double kI, double kD, double start_i, double settle_error, double settling_speed, double timeout, double delay_time);
-        void set_error(double error);
         double compute(double error);
         bool is_settled();
 };

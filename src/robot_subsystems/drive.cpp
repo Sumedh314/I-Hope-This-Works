@@ -12,7 +12,7 @@ Drive::Drive(
     const double MOTOR_GEAR_TEETH, const double WHEEL_GEAR_TEETH, const double TRACKING_WHEEL_DIAMETER, pros::Motor& front_left,
     pros::Motor& middle_left, pros::Motor& back_left, pros::Motor& front_right, pros::Motor& middle_right, pros::Motor& back_right,
     pros::IMU& inertial, pros::adi::Encoder& vertical, pros::adi::Encoder& horizontal, pros::Controller& controller,
-    PID drive_pid, PID turn_pid
+    PID drive_pid_IME, PID drive_pid, PID turn_pid
 ) :
     DRIVE_WHEEL_DIAMETER(DRIVE_WHEEL_DIAMETER),
     TRACK_WIDTH(TRACK_WIDTH),
@@ -31,6 +31,7 @@ Drive::Drive(
     vertical(vertical),
     horizontal(horizontal),
     controller(controller),
+    drive_pid_IME(drive_pid_IME),
     drive_pid(drive_pid),
     turn_pid(turn_pid),
     Point(0, 0)
@@ -85,9 +86,10 @@ void Drive::split_arcade() {
 
 /**
  * Uses the PID class to drive a certain distance. First accelerates to full speed smoothly and then begins the PID.
+ * This function uses the Integrated Motor Encoders to get the position of the wheels and does not use odometry.
  * TODO: figure out correct PID constants.
 */
-void Drive::drive_distance(double target, double max_voltage, double max_acceleration) {
+void Drive::drive_distance_with_IME(double target, double max_voltage, double max_acceleration) {
     double error = target;
     double prev_error = target;
     double voltage = sign(error);
@@ -113,21 +115,18 @@ void Drive::drive_distance(double target, double max_voltage, double max_acceler
     }
 
     // Set the error for the PID.
-    drive_pid.set_error(error);
+    drive_pid_IME.compute(error);
 
     // Keep going until the robot is settled, either by reaching the desired distance or by getting stuck for too long.
-    while (!drive_pid.is_settled()) {
+    while (!drive_pid_IME.is_settled()) {
 
-        // Get the current error and feet it into the PID controller.
+        // Get the current error and feet it into the PID controller. Position and error are in inches.
         position = front_left.get_position() * MOTOR_GEAR_TEETH / WHEEL_GEAR_TEETH * DRIVE_WHEEL_DIAMETER * pi / 360;
         error = target - position;
-        voltage = drive_pid.compute(error);
+        voltage = drive_pid_IME.compute(error);
 
         // Clamp the voltage to the maximum voltage.
-        if (fabs(voltage) > max_voltage) {
-            voltage = max_voltage * sign(voltage);
-            printf("voltage: %f\n", voltage);
-        }
+        voltage = clamp(voltage, max_voltage);
 
         // printf("volt: %f\n", voltage);
         // Output voltage and delay for next loop.
@@ -140,14 +139,45 @@ void Drive::drive_distance(double target, double max_voltage, double max_acceler
 }
 
 /**
+ * Uses the PID class to drive a certain distance. This function uses the vertical tracking wheel to get the distance.
+ * This should eliminate the need to accelerate smoothly at the beginning of the motion because the wheel shouldn't slip.
+*/
+void Drive::drive_distance(double target, double max_voltage) {
+
+    // Set the error to be a big number so the PID isn't settled.
+    drive_pid.compute(100);
+
+    // Get the original position of the encoder.
+    double original_position = vertical.get_value();
+
+    // Keep going until the robot if settled, either by reaching the desired distance or by getting stuck for too long.
+    while (!drive_pid.is_settled()) {
+
+        // Get the current error and feed it into the PID controller.
+        double current_position = (vertical.get_value() - original_position) * TRACKING_WHEEL_DIAMETER * pi / 360;
+        double error = target - current_position;
+        double voltage = drive_pid.compute(error);
+
+        // Clamp the voltage to the allowed range.
+        voltage = clamp(voltage, max_voltage);
+
+        // Output voltages and delay for next loop.
+        set_drive_voltages(voltage);
+        pros::delay(10);
+    }
+
+    // Make sure robot doesn't continue moving.
+    brake();
+}
+
+/**
  * Uses the PID class to turn to a certain heading. First accelerates to full speed smoothly and then begins the PID.
  * TODO: figure out correct PID constants.
- * TODO: unbounded heading might cause problems.
 */
 void Drive::turn_to_heading(double target, double max_voltage) {
     
     // Set the error to be a big number so the PID isn't settled.
-    turn_pid.set_error(100);
+    turn_pid.compute(100);
 
     // Keep going until the robot is settled, either by reaching the desired distance or by getting stuck for too long.
     while (!turn_pid.is_settled()) {
@@ -157,10 +187,8 @@ void Drive::turn_to_heading(double target, double max_voltage) {
         double error = reduce_negative_180_to_180(target - position);
         double voltage = turn_pid.compute(error);
 
-        // Clamp the voltage to the maximum voltage.
-        if (fabs(voltage) > max_voltage) {
-            voltage = max_voltage * sign(voltage);
-        }
+        // Clamp the voltage to the allowed range.
+        voltage = clamp(voltage, max_voltage);
 
         // Output voltages and delay for next loop.
         set_drive_voltages(-voltage, voltage);
@@ -172,13 +200,13 @@ void Drive::turn_to_heading(double target, double max_voltage) {
 }
 
 /**
- * Uses PID and odometry to drive the robot to a point.
+ * Uses PID and odometry to drive the robot to a point on the field.
  * TODO: Figure out correct PID constants.
 */
 void Drive::drive_to_point(double target_x, double target_y, double max_drive_voltage, double max_turn_voltage) {
 
     // Set error to be a big number so the PID is not settled and the while loop will start.
-    drive_pid.set_error(100);
+    drive_pid.compute(100);
 
     // Make the target a Point object.
     Point target(target_x, target_y);
@@ -206,13 +234,9 @@ void Drive::drive_to_point(double target_x, double target_y, double max_drive_vo
         // will drive forward slower if it is not directly facing the point.
         drive_voltage *= cos(deg_to_rad(turn_error));
 
-        // Keep the max voltages within the limits given by the parameters.
-        if (fabs(drive_voltage) > max_drive_voltage) {
-            drive_voltage = max_drive_voltage * sign(drive_voltage);
-        }
-        if (fabs(turn_voltage) > max_turn_voltage) {
-            turn_voltage = max_turn_voltage * sign(turn_voltage);
-        }
+        // Keep the voltages within the limits given by the parameters.
+        drive_voltage = clamp(drive_voltage, max_drive_voltage);
+        turn_voltage = clamp(turn_voltage, max_turn_voltage);
 
         // Move the robot and delay for next loop.
         set_drive_voltages(drive_voltage - turn_voltage, drive_voltage + turn_voltage);
@@ -376,6 +400,7 @@ void Drive::update_odometry() {
     double local_y_offset = 0;
 
     while (true) {
+
         // The time at which this iteration of the loop started.
         std::uint32_t start = pros::millis();
 
@@ -392,6 +417,7 @@ void Drive::update_odometry() {
             local_x_offset = horizontal_distance;
             local_y_offset = vertical_distance;
         }
+
         // If the robot has turned, the local offset is calculated using an arc approximation of the robot's movement.
         else {
             local_x_offset = 2 * sin(change_in_heading / 2) * (horizontal_distance / change_in_heading + HORIZONTAL_OFFSET);
