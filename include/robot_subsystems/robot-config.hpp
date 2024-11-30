@@ -19,4 +19,4 @@ extern pros::adi::Encoder horizontal;
 extern pros::Controller controller;
 
 // Pneumatics
-extern pros::adi::DigitalOut clamp;
+extern pros::adi::DigitalOut goal_clamp;

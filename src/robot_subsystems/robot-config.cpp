@@ -20,4 +20,4 @@ pros::adi::Encoder horizontal(3, 4, false);
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
 // Pneumatics
-pros::adi::DigitalOut clamp(1);
+pros::adi::DigitalOut goal_clamp(1);
