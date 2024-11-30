@@ -2,6 +2,10 @@
 #define PID_HPP
 #include "main.h"
 
+/**
+ * Uses PID, which stands for Proportional, Integral, Derivative, to move something to a desired location. For example,
+ * we can use PID to move the drivetrain a certain distance.
+*/
 class PID {
 
     // Variables to track the state of the movement
@@ -39,8 +43,8 @@ class PID {
 
     public:
         PID(double kP, double kI, double kD, double start_i, double settle_error, double settling_speed, double timeout, double delay_time);
-        void set_error(double new_error);
-        double compute(double new_error);
+        void set_error(double error);
+        double compute(double error);
         bool is_settled();
 };
 #endif

@@ -17,15 +17,15 @@ PID::PID(double kP, double kI, double kD, double start_i, double settle_error, d
 /**
  * Sets the error of the PID.
 */
-void PID::set_error(double new_error) {
-    error = new_error;
+void PID::set_error(double error) {
+    this->error = error;
 }
 
 /**
  * Uses the error, total error over time, and the current speed to compute an output value to feed into the mechanism.
 */ 
-double PID::compute(double new_error) {
-    error = new_error;
+double PID::compute(double error) {
+    this->error = error;
 
     // Only start counting the total error if the robot is already close to the target.
     if (fabs(error) <= start_i) {

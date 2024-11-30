@@ -62,6 +62,7 @@ void initialize() {
  * the robot is enabled, this task will exit.
  */
 void disabled() {
+
 	// Make sure the robot isn't holding onto a goal at the end of the match.
 	unclamp_goal();
 }
@@ -179,13 +180,6 @@ void print_odom() {
         pros::delay(50);
 	}
 }
-
-/**
- * Update odometry. Using pros::Task odom(drive.update_odometry); doesn't work for some reason.
-*/
-// void odometry() {
-// 	drive.update_odometry();
-// }
 
 /**
  * Runs the operator control code. This function will be started in its own task
