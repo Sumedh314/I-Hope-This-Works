@@ -250,18 +250,25 @@ void Drive::drive_to_point(double target_x, double target_y, double max_drive_vo
  * mostly used this guide to make this function: https://wiki.purduesigbots.com/software/control-algorithms/basic-pure-pursuit
 */
 void Drive::follow_path(double path[25][2], int path_length, int forward_voltage, int direction) {
+
+    // The radius around which the robot finds intersection points with the path. I just chose a value for this.
     double lookahead_radius = 9;
 
+    // The index for the points on the path. Starts at 1.
     int last_index = 1;
     
+    // A proportional constant for adjusting the heading. I just chose a value for this that worked.
     double kP = 0.4;
 
+    // The endopints of the line from the path that the robot is currently following.
     Point prev_point(0, 0);
     Point current_point(0, 0);
 
-    Point intersect1(0, 0);
-    Point intersect2(0, 0);
+    // The two points at which the robot's circle intersects the path.
+    Point intersect_1(0, 0);
+    Point intersect_2(0, 0);
 
+    // The point that the robot will try to follow.
     Point lookahead_point(0, 0);
     printf("Start function.\n");
 
@@ -277,7 +284,7 @@ void Drive::follow_path(double path[25][2], int path_length, int forward_voltage
 
         // If the line is vertical, make it slightly not vertical.
         if (current_point.get_x() - prev_point.get_x() == 0) {
-            current_point.set_x(current_point.get_x() + 0.003);
+            current_point.set_x(current_point.get_x() + 0.01);
         }
 
         // Find the equation of the line the robot is following in slope-intercept form.
@@ -297,25 +304,25 @@ void Drive::follow_path(double path[25][2], int path_length, int forward_voltage
         if (pow(quadratic_b, 2) - 4 * quadratic_a * quadratic_c >= 0) {
 
             // Find the intersection points using the quadratic formula.
-            intersect1.set_x((-quadratic_b + sqrt(pow(quadratic_b, 2) - 4 * quadratic_a * quadratic_c)) / (2 * quadratic_a));
-            intersect1.set_y(intersect1.get_x() * slope + y_int);
-            intersect2.set_x((-quadratic_b - sqrt(pow(quadratic_b, 2) - 4 * quadratic_a * quadratic_c)) / (2 * quadratic_a));
-            intersect2.set_y(intersect2.get_x() * slope + y_int);
+            intersect_1.set_x((-quadratic_b + sqrt(pow(quadratic_b, 2) - 4 * quadratic_a * quadratic_c)) / (2 * quadratic_a));
+            intersect_1.set_y(intersect_1.get_x() * slope + y_int);
+            intersect_2.set_x((-quadratic_b - sqrt(pow(quadratic_b, 2) - 4 * quadratic_a * quadratic_c)) / (2 * quadratic_a));
+            intersect_2.set_y(intersect_2.get_x() * slope + y_int);
 
             // If at least one intersection point is in range, figure out which one to follow.
-            if (intersect1.get_x() >= min_x && intersect1.get_x() <= max_x || intersect2.get_x() >= min_x && intersect2.get_x() <= max_x) {
+            if (intersect_1.get_x() >= min_x && intersect_1.get_x() <= max_x || intersect_2.get_x() >= min_x && intersect_2.get_x() <= max_x) {
 
                 // If both are in range, choose the one farther along the path.
-                if (intersect1.get_x() >= min_x && intersect1.get_x() <= max_x && intersect2.get_x() >= min_x && intersect2.get_x() <= max_x) {
+                if (intersect_1.get_x() >= min_x && intersect_1.get_x() <= max_x && intersect_2.get_x() >= min_x && intersect_2.get_x() <= max_x) {
                     
                     // Find which intersection point is closer to the end of the path and set that to the lookahead point.
-                    if (distance_between_points(intersect1, current_point) < distance_between_points(intersect2, current_point)) {
-                        lookahead_point.set_x(intersect1.get_x());
-                        lookahead_point.set_y(intersect1.get_y());
+                    if (distance_between_points(intersect_1, current_point) < distance_between_points(intersect_2, current_point)) {
+                        lookahead_point.set_x(intersect_1.get_x());
+                        lookahead_point.set_y(intersect_1.get_y());
                     }
                     else {
-                        lookahead_point.set_x(intersect2.get_x());
-                        lookahead_point.set_y(intersect2.get_y());
+                        lookahead_point.set_x(intersect_2.get_x());
+                        lookahead_point.set_y(intersect_2.get_y());
                     }
 
                     // printf("\nDistance to first point: \n%f", distance_between_points(intersect1, next_point));
@@ -323,15 +330,15 @@ void Drive::follow_path(double path[25][2], int path_length, int forward_voltage
                 }
                 
                 // Set the first intersection point as the lookahead point if only the first intersection point is in range.
-                else if (intersect1.get_x() >= min_x && intersect1.get_x() <= max_x) {
-                    lookahead_point.set_x(intersect1.get_x());
-                    lookahead_point.set_y(intersect1.get_y());
+                else if (intersect_1.get_x() >= min_x && intersect_1.get_x() <= max_x) {
+                    lookahead_point.set_x(intersect_1.get_x());
+                    lookahead_point.set_y(intersect_1.get_y());
                 }
                 
                 // Set the second intersection point as the lookahead point if only the second intersection point is in range.
                 else {
-                    lookahead_point.set_x(intersect2.get_x());
-                    lookahead_point.set_y(intersect2.get_y());
+                    lookahead_point.set_x(intersect_2.get_x());
+                    lookahead_point.set_y(intersect_2.get_y());
                 }
 
                 printf("Lookahead x: %f\n", lookahead_point.get_x());
@@ -339,7 +346,7 @@ void Drive::follow_path(double path[25][2], int path_length, int forward_voltage
             }
             
             // If neither intersection point is in range, move onto the next point.
-            else if ((intersect1.get_x() < min_x || intersect1.get_x() > max_x) && (intersect2.get_x() < min_x || intersect2.get_x() > max_x)) {
+            else if ((intersect_1.get_x() < min_x || intersect_1.get_x() > max_x) && (intersect_2.get_x() < min_x || intersect_2.get_x() > max_x)) {
                 last_index++;
                 printf("Neither is in range.\n");
                 printf("Last index: %d\n", last_index);
