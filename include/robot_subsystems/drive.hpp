@@ -52,6 +52,7 @@ class Drive : public Point{
         void drive_distance(double target, double max_voltage = 127, double max_acceleration = 6);
         void turn_to_heading(double degrees, double max_voltage = 127);
         void drive_to_point(double target_x, double target_y, double max_drive_voltage = 127, double max_turn_voltage = 127);
+        void follow_path(double path[25][2], int path_length, int forward_voltage, int direction);
         void update_odometry();
         void set_original_heading(double new_original_heading);
         double get_heading();
