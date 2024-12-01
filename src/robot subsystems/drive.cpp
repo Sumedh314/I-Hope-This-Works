@@ -23,8 +23,8 @@ Drive::Drive(
     TRACKING_WHEEL_DIAMETER(TRACKING_WHEEL_DIAMETER),
     front_left(front_left),
     middle_left(middle_left),
-    front_right(front_right),
     back_left(back_left),
+    front_right(front_right),
     middle_right(middle_right),
     back_right(back_right),
     inertial(inertial),
@@ -95,17 +95,15 @@ void Drive::drive_distance_with_IME(double target, double max_voltage, double ma
     double voltage = sign(error);
     double position = 0;
 
-    // Set starting position of the motor to 0
+    // Set starting position of the motor to 0 degrees.
     front_left.set_zero_position(0);
 
     // Accelerates at the beginning using the max acceleration. This is something our PID does not do, so we need to do
-    // it separately.
+    // it separately since the wheels could slip.
     while (fabs(voltage) < max_voltage) {
 
-        // Increase by max acceleration in the intended direction.
+        // Increase voltage by max acceleration in the intended direction and move the robot.
         voltage += max_acceleration * sign(voltage);
-
-        // Set motor voltages.
         set_drive_voltages(voltage);
         
         // Update position and previous error to the current error.
@@ -136,18 +134,20 @@ void Drive::drive_distance_with_IME(double target, double max_voltage, double ma
 }
 
 /**
- * Uses the PID class to drive a certain distance. This function uses the vertical tracking wheel to get the distance.
- * This should eliminate the need to accelerate smoothly at the beginning of the motion because the wheel shouldn't slip.
+ * Uses the PID class to drive a certain distance. This function uses the vertical tracking wheel to get the distance. This
+ * should eliminate the need to accelerate smoothly at the beginning of the motion because the tracking wheel shouldn't slip.
+ * TODO: figure out correct PID constants.
 */
 void Drive::drive_distance(double target, double max_voltage) {
 
-    // Get the original position of the encoder.
+    // Get the original position of the encoder in degrees.
     double original_position = vertical.get_value();
 
     // Keep going until the robot if settled, either by reaching the desired distance or by getting stuck for too long.
     while (!drive_pid.is_settled()) {
 
-        // Get the current error and feed it into the PID controller.
+        // Get the current error in inches and feed it into the PID controller. Looks at the difference in the current
+        // position and the original position and converts that to inches.
         double current_position = (vertical.get_value() - original_position) * TRACKING_WHEEL_DIAMETER * pi / 360;
         double error = target - current_position;
         double voltage = drive_pid.compute(error);
@@ -192,7 +192,7 @@ void Drive::turn_to_heading(double target, double max_voltage) {
 
 /**
  * Uses PID and odometry to drive the robot to a point on the field.
- * TODO: Figure out correct PID constants.
+ * TODO: figure out correct PID constants.
 */
 void Drive::drive_to_point(double target_x, double target_y, double max_drive_voltage, double max_turn_voltage) {
 
