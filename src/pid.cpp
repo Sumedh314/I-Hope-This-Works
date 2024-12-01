@@ -5,14 +5,20 @@
  * Creates a new PID object. This is better than programming it manually every time since we can use a PID for much
  * more than just a drivetrain, so we don't have to program it manually every time.
 */
-PID::PID(double kP, double kI, double kD, double start_i, double settle_error, double settling_speed, double timeout, double delay_time):
+PID::PID(double kP, double kI, double kD, double start_i, double settle_error, double settling_speed, double timeout, double delay_time) :
     kP(kP),
     kI(kI),
     kD(kD),
+    start_i(start_i),
     settle_error(settle_error),
+    settling_speed(settling_speed),
     timeout(timeout),
     delay_time(delay_time)
-{}
+{
+
+    // Make sure error is large so the PID doesn't start out being settled.
+    error = settle_error + 100;
+}
 
 /**
  * Uses the error, total error over time, and the current speed to compute an output value to feed into the mechanism.
@@ -52,8 +58,13 @@ double PID::compute(double error) {
 /**
  * The robot is settled if its error is witihin the desired range and its speed is zero, or if it gets stuck somewhere
  * for too long. This is so that even if the robot gets stuck, it can move on to the rest of the autonomous routine
- * and hopefully still score points.
+ * and hopefully still score points. Also sets the error to be greater than the settle error so it is not settled for
+ * the next loop.
 */
 bool PID::is_settled() {
-    return fabs(error) <= settle_error && derivative == 0 || time_settling >= timeout;
+    if (fabs(error) <= settle_error && derivative == 0 || time_settling >= timeout) {
+        error = settle_error + 100;
+        return true;
+    }
+    return false;
 }

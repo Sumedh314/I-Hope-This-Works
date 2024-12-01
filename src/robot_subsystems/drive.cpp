@@ -114,9 +114,6 @@ void Drive::drive_distance_with_IME(double target, double max_voltage, double ma
         pros::delay(10);
     }
 
-    // Set the error for the PID.
-    drive_pid_IME.compute(error);
-
     // Keep going until the robot is settled, either by reaching the desired distance or by getting stuck for too long.
     while (!drive_pid_IME.is_settled()) {
 
@@ -143,9 +140,6 @@ void Drive::drive_distance_with_IME(double target, double max_voltage, double ma
  * This should eliminate the need to accelerate smoothly at the beginning of the motion because the wheel shouldn't slip.
 */
 void Drive::drive_distance(double target, double max_voltage) {
-
-    // Set the error to be a big number so the PID isn't settled.
-    drive_pid.compute(100);
 
     // Get the original position of the encoder.
     double original_position = vertical.get_value();
@@ -175,9 +169,6 @@ void Drive::drive_distance(double target, double max_voltage) {
  * TODO: figure out correct PID constants.
 */
 void Drive::turn_to_heading(double target, double max_voltage) {
-    
-    // Set the error to be a big number so the PID isn't settled.
-    turn_pid.compute(100);
 
     // Keep going until the robot is settled, either by reaching the desired distance or by getting stuck for too long.
     while (!turn_pid.is_settled()) {
@@ -204,9 +195,6 @@ void Drive::turn_to_heading(double target, double max_voltage) {
  * TODO: Figure out correct PID constants.
 */
 void Drive::drive_to_point(double target_x, double target_y, double max_drive_voltage, double max_turn_voltage) {
-
-    // Set error to be a big number so the PID is not settled and the while loop will start.
-    drive_pid.compute(100);
 
     // Make the target a Point object.
     Point target(target_x, target_y);
