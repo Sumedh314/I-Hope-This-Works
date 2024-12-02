@@ -179,6 +179,19 @@ void print_odom() {
 }
 
 /**
+ * Vibrates the controller when there are 15 seconds left to alert the driver to not place goals in the positive corners.
+*/
+void dont_get_DQed() {
+	int start = pros::millis();
+
+	// Wait until 90000 milliseconds (1 minute and 30 seconds) have passed.
+	while (pros::millis() - start <= 90000) {
+		pros::delay(50);
+	}
+	controller.rumble("_");
+}
+
+/**
  * Runs the operator control code. This function will be started in its own task
  * with the default priority and stack size whenever the robot is enabled via
  * the Field Management System or the VEX Competition Switch in the operator
@@ -199,6 +212,7 @@ void opcontrol() {
 	pros::Task spin(spin_intake);
 	pros::Task toggle(toggle_clamp);
 	pros::Task drive([](){robot.split_arcade();});
+	pros::Task vibrate_controller(dont_get_DQed);
 
 	// Calibrate inertial sensor, wait for it to calibrate, and start odometry after a button on the controller is pressed.
 	while (!controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)) {
