@@ -164,7 +164,7 @@ void Drive::drive_distance(double target, double max_voltage) {
         // Output voltages and delay for next loop.
         printf("volt: %f\n", voltage);
         set_drive_voltages(voltage);
-        pros::delay(20);
+        pros::delay(10);
     }
 
     // Make sure robot doesn't continue moving.

@@ -25,7 +25,6 @@ PID::PID(double kP, double kI, double kD, double start_i, double settle_error, d
 */ 
 double PID::compute(double error) {
     this->error = error;
-    this->prev_error = error;
     printf("error: %f\n", error);
     printf("prev_error: %f\n", prev_error);
     printf("start_i: %f\n", start_i);
@@ -68,7 +67,7 @@ double PID::compute(double error) {
 }
 
 /**
- * The robot is settled if its error is witihin the desired range and its speed is zero, or if it gets stuck somewhere
+ * The robot is settled if its error is within the desired range and its speed is zero, or if it gets stuck somewhere
  * for too long. This is so that even if the robot gets stuck, it can move on to the rest of the autonomous routine
  * and hopefully still score points. Also sets the error to be greater than the settle error so it is not settled for
  * the next loop.
