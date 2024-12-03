@@ -74,7 +74,7 @@ double PID::compute(double error) {
  * the next loop.
 */
 bool PID::is_settled() {
-    if (fabs(error) <= settle_error && derivative == 0 || time_settling >= timeout) {
+    if (fabs(error) <= settle_error && fabs(derivative) <= settling_speed || time_settling >= timeout) {
         // error = settle_error + 100;
         return true;
     }
