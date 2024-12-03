@@ -25,6 +25,16 @@ PID::PID(double kP, double kI, double kD, double start_i, double settle_error, d
 */ 
 double PID::compute(double error) {
     this->error = error;
+    this->prev_error = error;
+    printf("error: %f\n", error);
+    printf("prev_error: %f\n", prev_error);
+    printf("start_i: %f\n", start_i);
+    printf("total_error: %f\n", total_error);
+    printf("delay_time: %f\n", delay_time);
+    printf("settle_error: %f\n", settle_error);
+    printf("time_settling: %f\n", time_settling);
+    printf("settling_speed: %f\n", settling_speed);
+    printf("derivative: %f\n", derivative);
 
     // Only start counting the total error if the robot is already close to the target.
     if (fabs(error) <= start_i) {

@@ -159,11 +159,12 @@ void Drive::drive_distance(double target, double max_voltage) {
 
         // Clamp the voltage to the allowed range.
         voltage = clamp(voltage, max_voltage);
+        // double voltage = 0;
 
         // Output voltages and delay for next loop.
         printf("volt: %f\n", voltage);
         set_drive_voltages(voltage);
-        pros::delay(10);
+        pros::delay(20);
     }
 
     // Make sure robot doesn't continue moving.

@@ -8,7 +8,7 @@
 
 // Create PID and drivetrain objects used for the rest of the code.
 PID drive_pid_IME(20.5, 0, 1.7, 10, 1, 0.02, 4000, 0.01);
-PID drive_pid(5, 0, 0, 5, 10, 10, 4000, 0.01);
+PID drive_pid(5, 0, 0, 5, 10, 10, 4000, 0.02);
 PID turn_pid(1.9, 0, 0, 15, 5, 10, 4000, 0.01);
 Drive robot(
 	3.25, 7, 0, 2.25, 36, 60, 2.8,
@@ -222,6 +222,8 @@ void opcontrol() {
 	pros::delay(3000);
 	pros::Task odom([](){robot.update_odometry();});
 	pros::Task print(print_odom);
+
+	robot.drive_distance(24);
 
 	// robot.turn_to_heading(0);
 	// robot.drive_to_point(96, 0);
