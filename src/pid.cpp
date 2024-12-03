@@ -17,7 +17,7 @@ PID::PID(double kP, double kI, double kD, double start_i, double settle_error, d
 {
 
     // Make sure error is large so the PID doesn't start out being settled.
-    error = settle_error + 100;
+    // error = settle_error + 100;
 }
 
 /**
@@ -52,6 +52,8 @@ double PID::compute(double error) {
 
     // Calculate and return output.
     output = kP * error + kI * total_error + kD * derivative;
+    printf("error: %f\n", error);
+    printf("output: %f\n", output);
     return output;
 }
 
@@ -63,7 +65,7 @@ double PID::compute(double error) {
 */
 bool PID::is_settled() {
     if (fabs(error) <= settle_error && derivative == 0 || time_settling >= timeout) {
-        error = settle_error + 100;
+        // error = settle_error + 100;
         return true;
     }
     return false;

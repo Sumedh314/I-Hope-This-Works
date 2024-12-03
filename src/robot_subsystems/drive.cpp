@@ -98,6 +98,8 @@ void Drive::drive_distance_with_IME(double target, double max_voltage, double ma
     // Set starting position of the motor to 0 degrees.
     front_left.set_zero_position(0);
 
+    drive_pid_IME.compute(100);
+
     // Accelerates at the beginning using the max acceleration. This is something our PID does not do, so we need to do
     // it separately since the wheels could slip.
     while (fabs(voltage) < max_voltage) {
@@ -143,6 +145,8 @@ void Drive::drive_distance(double target, double max_voltage) {
     // Get the original position of the encoder in degrees.
     double original_position = vertical.get_value();
 
+    drive_pid.compute(100);
+
     // Keep going until the robot if settled, either by reaching the desired distance or by getting stuck for too long.
     while (!drive_pid.is_settled()) {
 
@@ -151,11 +155,13 @@ void Drive::drive_distance(double target, double max_voltage) {
         double current_position = (vertical.get_value() - original_position) * TRACKING_WHEEL_DIAMETER * pi / 360;
         double error = target - current_position;
         double voltage = drive_pid.compute(error);
+        printf("current value: %d\n", vertical.get_value());
 
         // Clamp the voltage to the allowed range.
         voltage = clamp(voltage, max_voltage);
 
         // Output voltages and delay for next loop.
+        printf("volt: %f\n", voltage);
         set_drive_voltages(voltage);
         pros::delay(10);
     }
@@ -169,6 +175,8 @@ void Drive::drive_distance(double target, double max_voltage) {
  * TODO: figure out correct PID constants.
 */
 void Drive::turn_to_heading(double target, double max_voltage) {
+
+    turn_pid.compute(100);
 
     // Keep going until the robot is settled, either by reaching the desired distance or by getting stuck for too long.
     while (!turn_pid.is_settled()) {
@@ -198,6 +206,8 @@ void Drive::drive_to_point(double target_x, double target_y, double max_drive_vo
 
     // Make the target a Point object.
     Point target(target_x, target_y);
+
+    drive_pid.compute(100);
 
     // Keep going until the robot is settled, either by reaching the desired point or by getting stuck for too long.
     while (!drive_pid.is_settled()) {
@@ -242,7 +252,7 @@ void Drive::follow_path(double path[25][2], int path_length, int forward_voltage
     // The radius around which the robot finds intersection points with the path. I just chose a value for this.
     double lookahead_radius = 9;
 
-    // The index for the points on the path. Starts at 1.
+    // The index for the points on the path. Starts at 1 and iterates through the path.
     int last_index = 1;
     
     // A proportional constant for adjusting the heading. I just chose a value for this that worked.
@@ -279,7 +289,7 @@ void Drive::follow_path(double path[25][2], int path_length, int forward_voltage
         double slope = (current_point.get_y() - prev_point.get_y()) / (current_point.get_x() - prev_point.get_x());
         double y_int = current_point.get_y() - slope * current_point.get_x();
 
-        // Set quadratic coefficients.
+        // Set quadratic coefficients. This was derived by setting the equations for a circle and a line equal to each other.
         double quadratic_a = (1 + pow(slope, 2));
         double quadratic_b = (-2 * x - 2 * slope * y + 2 * slope * y_int);
         double quadratic_c = (pow(x, 2) + pow(y_int, 2) - 2 * y_int * y + pow(y, 2) - pow(lookahead_radius, 2));

@@ -86,7 +86,7 @@ double clamp(double value, double max_range) {
 }
 
 /**
- * Calculates the distance between two points using the Pythagorean Theorem
+ * Calculates the distance between two points using the Pythagorean Theorem.
 */
 double distance_between_points(Point first, Point second) {
     return sqrt(pow(second.get_x() - first.get_x(), 2) + pow(second.get_y() - first.get_y(), 2));
