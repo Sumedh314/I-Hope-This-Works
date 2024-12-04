@@ -41,8 +41,10 @@ class PID {
     // The amount of time in milliseconds between each iteration of the loop.
     double delay_time = 0;
 
+    bool settled_flag = false;
+
     public:
-        PID(double kP, double kI, double kD, double start_i, double settle_error, double settling_speed, double timeout, double delay_time);
+        PID(double kP, double kI, double kD, double start_i, double settle_error, double settling_speed, double timeout = 4000, double delay_time = 0.01);
         double compute(double error);
         bool is_settled();
 };

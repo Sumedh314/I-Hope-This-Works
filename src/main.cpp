@@ -7,9 +7,9 @@
 #include "autons.hpp"
 
 // Create PID and drivetrain objects used for the rest of the code.
-PID drive_pid_IME(20.5, 0, 1.7, 10, 1, 0.02, 4000, 0.01);
-PID drive_pid(5, 0, 0, 5, 3, 1, 4000, 0.01);
-PID turn_pid(1.9, 0, 0, 4, 5, 10, 4000, 0.01);
+PID drive_pid_IME(20.5, 0, 1.7, 10, 1, 0.02);
+PID drive_pid(8, 0, 0.2, 5, 3, 1);
+PID turn_pid(2.86, 1, 0.2, 15, 3, 3);
 Drive robot(
 	3.25, 7, 0, 2.25, 36, 60, 2.8,
 	front_left, middle_left, back_left, front_right, middle_right, back_right, inertial, vertical, horizontal,
@@ -171,7 +171,7 @@ void print_odom() {
 	while (true) {
         controller.print(0, 0, "X coor: %f", robot.get_x());
         pros::delay(50);
-        controller.print(1, 0, "Y coor: %d", vertical.get_value());
+        controller.print(1, 0, "Y coor: %f", robot.get_y());
         pros::delay(50);
         controller.print(2, 0, "Heading: %f", robot.get_heading());
         pros::delay(50);
@@ -207,23 +207,35 @@ void dont_get_DQed() {
 void opcontrol() {
 
 	// The robot starts facing 90 degrees (forward).
+	inertial.reset();
+	pros::delay(3000);
 	robot.set_original_heading(90);
 
 	// Start tasks.
 	pros::Task spin(spin_intake);
 	pros::Task toggle(toggle_clamp);
-	pros::Task drive([](){robot.split_arcade();});
 	pros::Task vibrate_controller(dont_get_DQed);
 
 	// robot.drive_distance_with_IME(24);
 	// robot.drive_distance_with_IME(-24);
 
-	inertial.reset();
-	pros::delay(3000);
 	pros::Task odom([](){robot.update_odometry();});
+	pros::delay(100);
 	pros::Task print(print_odom);
 
-	robot.drive_distance(24);
+	// robot.drive_distance(36);
+	// robot.drive_distance(-36);
+
+	// robot.turn_to_heading(180);
+	// pros::delay(500);
+	// robot.turn_to_heading(0);
+	// pros::delay(500);
+	// robot.turn_to_heading(90);
+
+	robot.drive_to_point(24, 24);
+	robot.turn_to_heading(270);
+	robot.drive_to_point(0, 0);
+	robot.turn_to_heading(90);
 
 	// robot.turn_to_heading(0);
 	// robot.drive_to_point(96, 0);
@@ -236,10 +248,7 @@ void opcontrol() {
 	// robot.drive_distance(48);
 	// robot.drive_distance(-48);
 
-	while (true) {
-		printf("value: %d\n", vertical.get_value());
-		pros::delay(50);
-	}
+	pros::Task drive([](){robot.split_arcade();});
 
 	// Calibrate inertial sensor, wait for it to calibrate, and start odometry after a button on the controller is pressed.
 	// while (!controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)) {

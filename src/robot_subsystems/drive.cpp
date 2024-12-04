@@ -98,8 +98,6 @@ void Drive::drive_distance_with_IME(double target, double max_voltage, double ma
     // Set starting position of the motor to 0 degrees.
     front_left.set_zero_position(0);
 
-    drive_pid_IME.compute(100);
-
     // Accelerates at the beginning using the max acceleration. This is something our PID does not do, so we need to do
     // it separately since the wheels could slip.
     while (fabs(voltage) < max_voltage) {
@@ -145,8 +143,6 @@ void Drive::drive_distance(double target, double max_voltage) {
     // Get the original position of the encoder in degrees.
     double original_position = vertical.get_value();
 
-    drive_pid.compute(100);
-
     // Keep going until the robot if settled, either by reaching the desired distance or by getting stuck for too long.
     while (!drive_pid.is_settled()) {
 
@@ -155,14 +151,12 @@ void Drive::drive_distance(double target, double max_voltage) {
         double current_position = (vertical.get_value() - original_position) * TRACKING_WHEEL_DIAMETER * pi / 360;
         double error = target - current_position;
         double voltage = drive_pid.compute(error);
-        printf("current value: %d\n", vertical.get_value());
 
         // Clamp the voltage to the allowed range.
         voltage = clamp(voltage, max_voltage);
         // double voltage = 0;
 
         // Output voltages and delay for next loop.
-        printf("volt: %f\n", voltage);
         set_drive_voltages(voltage);
         pros::delay(10);
     }
@@ -176,8 +170,6 @@ void Drive::drive_distance(double target, double max_voltage) {
  * TODO: figure out correct PID constants.
 */
 void Drive::turn_to_heading(double target, double max_voltage) {
-
-    turn_pid.compute(100);
 
     // Keep going until the robot is settled, either by reaching the desired distance or by getting stuck for too long.
     while (!turn_pid.is_settled()) {
@@ -208,16 +200,12 @@ void Drive::drive_to_point(double target_x, double target_y, double max_drive_vo
     // Make the target a Point object.
     Point target(target_x, target_y);
 
-    drive_pid.compute(100);
-
     // Keep going until the robot is settled, either by reaching the desired point or by getting stuck for too long.
     while (!drive_pid.is_settled()) {
         
         // Find errors in the distance and angle it needs to turn to to get to the desired point.
         double lateral_error = distance_between_points(*this, target);
-        double turn_error = reduce_negative_180_to_180(
-            rad_to_deg(atan2(target.get_y() - y, target.get_x() - x) - deg_to_rad(get_heading()))
-        );
+        double turn_error = rad_to_deg(atan2(target.get_y() - y, target.get_x() - x) - deg_to_rad(get_heading()));
 
         // Reverse turning and driving so the robot drives backwards if the back of the robot is facing the target.
         if (fabs(turn_error) > 90) {
@@ -236,6 +224,10 @@ void Drive::drive_to_point(double target_x, double target_y, double max_drive_vo
         // Keep the voltages within the limits given by the parameters.
         drive_voltage = clamp(drive_voltage, max_drive_voltage);
         turn_voltage = clamp(turn_voltage, max_turn_voltage);
+
+        if (fabs(drive_voltage) + fabs(turn_voltage) > 127) {
+            drive_voltage = (127 - fabs(turn_voltage)) * sign(drive_voltage);
+        }
 
         // Move the robot and delay for next loop.
         set_drive_voltages(drive_voltage - turn_voltage, drive_voltage + turn_voltage);

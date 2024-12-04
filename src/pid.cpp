@@ -13,11 +13,10 @@ PID::PID(double kP, double kI, double kD, double start_i, double settle_error, d
     settle_error(settle_error),
     settling_speed(settling_speed),
     timeout(timeout),
-    delay_time(delay_time)
+    delay_time(delay_time),
+    settled_flag(false)
 {
-
-    // Make sure error is large so the PID doesn't start out being settled.
-    // error = settle_error + 100;
+    error = settle_error + 100;
 }
 
 /**
@@ -25,15 +24,6 @@ PID::PID(double kP, double kI, double kD, double start_i, double settle_error, d
 */ 
 double PID::compute(double error) {
     this->error = error;
-    printf("error: %f\n", error);
-    printf("prev_error: %f\n", prev_error);
-    printf("start_i: %f\n", start_i);
-    printf("total_error: %f\n", total_error);
-    printf("delay_time: %f\n", delay_time);
-    printf("settle_error: %f\n", settle_error);
-    printf("time_settling: %f\n", time_settling);
-    printf("settling_speed: %f\n", settling_speed);
-    printf("derivative: %f\n", derivative);
 
     // Only start counting the total error if the robot is already close to the target.
     if (fabs(error) <= start_i) {
@@ -61,20 +51,17 @@ double PID::compute(double error) {
 
     // Calculate and return output.
     output = kP * error + kI * total_error + kD * derivative;
-    printf("error: %f\n", error);
-    printf("output: %f\n", output);
     return output;
 }
 
 /**
  * The robot is settled if its error is within the desired range and its speed is zero, or if it gets stuck somewhere
  * for too long. This is so that even if the robot gets stuck, it can move on to the rest of the autonomous routine
- * and hopefully still score points. Also sets the error to be greater than the settle error so it is not settled for
- * the next loop.
+ * and hopefully still score points.
 */
 bool PID::is_settled() {
     if (fabs(error) <= settle_error && fabs(derivative) <= settling_speed || time_settling >= timeout) {
-        // error = settle_error + 100;
+        error = settle_error + 100;
         return true;
     }
     return false;
