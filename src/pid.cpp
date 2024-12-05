@@ -1,5 +1,6 @@
 #include "main.h"
 #include "pid.hpp"
+#include "util.hpp"
 
 /**
  * Creates a new PID object. This is better than programming it manually every time since we can use a PID for much
@@ -13,9 +14,9 @@ PID::PID(double kP, double kI, double kD, double start_i, double settle_error, d
     settle_error(settle_error),
     settling_speed(settling_speed),
     timeout(timeout),
-    delay_time(delay_time),
-    settled_flag(false)
+    delay_time(delay_time)
 {
+    // Set the error to be really big so the PID is not settled.
     error = settle_error + 100;
 }
 
@@ -30,11 +31,11 @@ double PID::compute(double error) {
         total_error += error * delay_time;
     }
     // Set integral back to zero if the robot crosses the target to prevent it from accumulating too much.
-    if (error >= 0 && prev_error <= 0 || error <= 0 && prev_error >= 0) {
+    if (sign(error) != sign(prev_error)) {
         total_error = 0;
     }
     
-    // Current speed of the mechanism.
+    // Negative of current speed of the mechanism.
     derivative = (error - prev_error) / delay_time;
 
     // Reset previous error for next loop.
@@ -57,7 +58,7 @@ double PID::compute(double error) {
 /**
  * The robot is settled if its error is within the desired range and its speed is zero, or if it gets stuck somewhere
  * for too long. This is so that even if the robot gets stuck, it can move on to the rest of the autonomous routine
- * and hopefully still score points.
+ * and hopefully still score points. Also makes the error really big so the PID is not settled for the next loop.
 */
 bool PID::is_settled() {
     if (fabs(error) <= settle_error && fabs(derivative) <= settling_speed || time_settling >= timeout) {

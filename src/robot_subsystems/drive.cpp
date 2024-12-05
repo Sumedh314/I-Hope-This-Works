@@ -195,7 +195,8 @@ void Drive::turn_to_heading(double target, double max_voltage) {
  * Uses PID and odometry to drive the robot to a point on the field.
  * TODO: figure out correct PID constants.
 */
-void Drive::drive_to_point(double target_x, double target_y, double max_drive_voltage, double max_turn_voltage) {
+void Drive::drive_to_point(double target_x, double target_y, double max_drive_voltage, double max_turn_voltage, double turn_limit) {
+    double turn_voltage = 0;
 
     // Make the target a Point object.
     Point target(target_x, target_y);
@@ -215,7 +216,15 @@ void Drive::drive_to_point(double target_x, double target_y, double max_drive_vo
 
         // Use the PID class to get the voltages.
         double drive_voltage = drive_pid.compute(lateral_error);
-        double turn_voltage = turn_pid.compute(turn_error);
+
+        // Only calculate turn voltage if the lateral error is large. This is to help prevent the robot turning a lot
+        // near the end.
+        if (fabs(lateral_error) > turn_limit) {
+            turn_voltage = turn_pid.compute(turn_error);
+        }
+        else {
+            turn_voltage = 0;
+        }
 
         // Scale the drive voltage to be smaller based on how much the robot is facing the target. This way, the robot
         // will drive forward slower if it is not directly facing the point.
@@ -225,7 +234,10 @@ void Drive::drive_to_point(double target_x, double target_y, double max_drive_vo
         drive_voltage = clamp(drive_voltage, max_drive_voltage);
         turn_voltage = clamp(turn_voltage, max_turn_voltage);
 
+        // Prevent the sum of drive_voltage and turn_voltage from being greater than the maximum allowed voltage.
         if (fabs(drive_voltage) + fabs(turn_voltage) > 127) {
+
+            // Essentially the same as drive_voltage = 127 - turn_voltage, but accounts for sign changes.
             drive_voltage = (127 - fabs(turn_voltage)) * sign(drive_voltage);
         }
 
@@ -233,6 +245,7 @@ void Drive::drive_to_point(double target_x, double target_y, double max_drive_vo
         set_drive_voltages(drive_voltage - turn_voltage, drive_voltage + turn_voltage);
         pros::delay(10);
     }
+    turn_pid.compute(100);
 }
 
 /**
@@ -376,7 +389,9 @@ void Drive::follow_path(double path[25][2], int path_length, int forward_voltage
         // Move robot
         // double turn_voltage = TRACK_WIDTH * sin(deg_to_rad(turn_error)) / lookahead_radius * forward_voltage;
         double turn_voltage = turn_error * kP;
-        double new_forward_voltage = forward_voltage - 2 * turn_voltage;
+        double new_forward_voltage = forward_voltage - 3 * fabs(turn_voltage);
+        printf("forward voltage: %f\n", new_forward_voltage);
+        printf("turn voltage: %f\n", turn_voltage);
         set_drive_voltages(-turn_voltage + new_forward_voltage * direction, turn_voltage + new_forward_voltage * direction);
 
         pros::Task::delay(10);

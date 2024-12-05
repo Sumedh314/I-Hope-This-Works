@@ -232,19 +232,28 @@ void opcontrol() {
 	// pros::delay(500);
 	// robot.turn_to_heading(90);
 
-	robot.drive_to_point(24, 24);
-	robot.turn_to_heading(270);
-	robot.drive_to_point(0, 0);
-	robot.turn_to_heading(90);
+	// robot.drive_to_point(24, -1);
+	// robot.turn_to_heading(270);
+	// robot.drive_to_point(0, 0);
+	// robot.turn_to_heading(90);
+
+	// double path[25][2] = {{0, 0}, {-6, 12}, {12, 12}, {18, 12}, {24, 6}, {18, -6}, {0, 0}};
+	// robot.follow_path(path, 7, 127, 1);
+	// robot.turn_to_heading(90);
+
+	while (true) {
+		robot.drive_to_point(0, 0);
+		pros::delay(10);
+	}
 
 	// robot.turn_to_heading(0);
-	// robot.drive_to_point(96, 0);
+	robot.drive_to_point(36, 36);
 	// robot.turn_to_heading(90);
 	// robot.drive_to_point(96, 96);
 	// robot.turn_to_heading(180);
-	// robot.drive_to_point(0, 96);
+	robot.drive_to_point(0, 72);
 	// robot.turn_to_heading(270);
-	// robot.drive_to_point(0, 0);
+	robot.drive_to_point(0, 0);
 	// robot.drive_distance(48);
 	// robot.drive_distance(-48);
 
