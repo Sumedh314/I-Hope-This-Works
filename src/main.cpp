@@ -11,7 +11,7 @@ PID drive_pid_IME(20.5, 0, 1.7, 10, 1, 0.02);
 PID drive_pid(8, 0, 0.2, 5, 3, 1);
 PID turn_pid(2.86, 1, 0.2, 15, 3, 3);
 Drive robot(
-	3.25, 7, 0, 2.25, 36, 60, 2.8,
+	3.25, 7, 0.1, 2.25, 36, 60, 2.8,
 	front_left, middle_left, back_left, front_right, middle_right, back_right, inertial, vertical, horizontal,
 	controller, drive_pid_IME, drive_pid, turn_pid
 );
@@ -233,27 +233,28 @@ void opcontrol() {
 	// robot.turn_to_heading(90);
 
 	// robot.drive_to_point(24, -1);
-	// robot.turn_to_heading(270);
-	// robot.drive_to_point(0, 0);
+	// robot.turn_to_heading(0);
+	// robot.drive_to_point(48, 12);
 	// robot.turn_to_heading(90);
+	// robot.drive_to_point(0, 0);
 
 	// double path[25][2] = {{0, 0}, {-6, 12}, {12, 12}, {18, 12}, {24, 6}, {18, -6}, {0, 0}};
 	// robot.follow_path(path, 7, 127, 1);
 	// robot.turn_to_heading(90);
 
-	while (true) {
-		robot.drive_to_point(0, 0);
-		pros::delay(10);
-	}
+	// while (true) {
+	// 	robot.drive_to_point(0, 0);
+	// 	pros::delay(10);
+	// }
 
 	// robot.turn_to_heading(0);
-	robot.drive_to_point(36, 36);
+	// robot.drive_to_point(36, 36);
 	// robot.turn_to_heading(90);
 	// robot.drive_to_point(96, 96);
 	// robot.turn_to_heading(180);
-	robot.drive_to_point(0, 72);
+	// robot.drive_to_point(0, 72);
 	// robot.turn_to_heading(270);
-	robot.drive_to_point(0, 0);
+	// robot.drive_to_point(0, 0);
 	// robot.drive_distance(48);
 	// robot.drive_distance(-48);
 
