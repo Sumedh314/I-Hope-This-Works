@@ -80,7 +80,7 @@ void Drive::split_arcade() {
         double right_voltage = left_value * fabs(left_value) / 127 - right_value * fabs(right_value) / 127;
 
         set_drive_voltages(left_voltage, right_voltage);
-        pros::delay(30);
+        pros::delay(20);
     }
 }
 
@@ -166,32 +166,6 @@ void Drive::drive_distance(double target, double max_voltage) {
 }
 
 /**
- * Uses the PID class to turn to a certain heading. First accelerates to full speed smoothly and then begins the PID.
- * TODO: figure out correct PID constants.
-*/
-void Drive::turn_to_heading(double target, double max_voltage) {
-
-    // Keep going until the robot is settled, either by reaching the desired distance or by getting stuck for too long.
-    while (!turn_pid.is_settled()) {
-
-        // Get the current error and feet it into the PID controller.
-        double position = get_heading();
-        double error = reduce_negative_180_to_180(target - position);
-        double voltage = turn_pid.compute(error);
-
-        // Clamp the voltage to the allowed range.
-        voltage = clamp(voltage, max_voltage);
-
-        // Output voltages and delay for next loop.
-        set_drive_voltages(-voltage, voltage);
-        pros::delay(10);
-    }
-
-    // Make sure robot doesn't continue moving.
-    brake();
-}
-
-/**
  * Uses PID and odometry to drive the robot to a point on the field.
  * TODO: figure out correct PID constants.
 */
@@ -246,6 +220,57 @@ void Drive::drive_to_point(double target_x, double target_y, double max_drive_vo
         pros::delay(10);
     }
     turn_pid.compute(100);
+}
+
+/**
+ * Uses the PID class to turn to a certain heading. First accelerates to full speed smoothly and then begins the PID.
+ * TODO: figure out correct PID constants.
+*/
+void Drive::turn_to_heading(double target, double max_voltage) {
+
+    // Keep going until the robot is settled, either by reaching the desired distance or by getting stuck for too long.
+    while (!turn_pid.is_settled()) {
+
+        // Get the current error and feet it into the PID controller.
+        double position = get_heading();
+        double error = reduce_negative_180_to_180(target - position);
+        double voltage = turn_pid.compute(error);
+
+        // Clamp the voltage to the allowed range.
+        voltage = clamp(voltage, max_voltage);
+
+        // Output voltages and delay for next loop.
+        set_drive_voltages(-voltage, voltage);
+        pros::delay(10);
+    }
+
+    // Make sure robot doesn't continue moving.
+    brake();
+}
+
+void Drive::turn_to_point(double target_x, double target_y, double max_voltage) {
+
+    // Make the target a Point object.
+    Point target(target_x, target_y);
+
+    // Keep going until the robot is settled, either by reaching the desired distance or by getting stuck for too long.
+    while (!turn_pid.is_settled()) {
+
+        // Get the current error and feet it into the PID controller.
+        double position = get_heading();
+        double error = rad_to_deg(atan2(target.get_y() - y, target.get_x() - x) - deg_to_rad(get_heading()));
+        double voltage = turn_pid.compute(error);
+
+        // Clamp the voltage to the allowed range.
+        voltage = clamp(voltage, max_voltage);
+
+        // Output voltages and delay for next loop.
+        set_drive_voltages(-voltage, voltage);
+        pros::delay(10);
+    }
+
+    // Make sure robot doesn't continue moving.
+    brake();
 }
 
 /**

@@ -7,8 +7,8 @@
 #include "autons.hpp"
 
 // Create PID and drivetrain objects used for the rest of the code.
-PID drive_pid_IME(20.5, 0, 1.7, 10, 1, 0.02);
-PID drive_pid(8, 0, 0.2, 5, 3, 1);
+PID drive_pid_IME(20.5, 0, 1.7, 10, 1, 1);
+PID drive_pid(8, 0, 0.2, 5, 2, 1);
 PID turn_pid(2.86, 1, 0.2, 15, 3, 3);
 Drive robot(
 	3.25, 7, 0.1, 2.25, 36, 60, 2.8,
