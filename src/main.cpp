@@ -205,11 +205,13 @@ void dont_get_DQed() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-
-	// The robot starts facing 90 degrees (forward).
 	inertial.reset();
 	pros::delay(3000);
-	robot.set_original_heading(90);
+	red_right();
+
+	// The robot starts facing 90 degrees (forward).
+	robot.set_original_heading(180);
+	robot.set_coordinates(-14.5, -60);
 
 	// Start tasks.
 	pros::Task spin(spin_intake);
@@ -219,9 +221,16 @@ void opcontrol() {
 	// robot.drive_distance_with_IME(24);
 	// robot.drive_distance_with_IME(-24);
 
-	pros::Task odom([](){robot.update_odometry();});
+	// pros::Task odom([](){robot.update_odometry();});
 	pros::delay(100);
-	pros::Task print(print_odom);
+	// pros::Task print(print_odom);
+
+
+	// robot.drive_to_point(96, 0);
+	// robot.drive_to_point(96, 96);
+	// // robot.drive_to_point(0, 96);
+	// robot.drive_to_point(0, 0);
+	// robot.turn_to_heading(90);
 
 	// robot.drive_distance(36);
 	// robot.drive_distance(-36);

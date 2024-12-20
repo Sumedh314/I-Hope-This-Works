@@ -169,7 +169,7 @@ void Drive::drive_distance(double target, double max_voltage) {
  * Uses PID and odometry to drive the robot to a point on the field.
  * TODO: figure out correct PID constants.
 */
-void Drive::drive_to_point(double target_x, double target_y, double max_drive_voltage, double max_turn_voltage, double turn_limit) {
+void Drive::drive_to_point(double target_x, double target_y, bool reversed, double max_drive_voltage, double max_turn_voltage, double turn_limit) {
     double turn_voltage = 0;
 
     // Make the target a Point object.
@@ -180,10 +180,12 @@ void Drive::drive_to_point(double target_x, double target_y, double max_drive_vo
         
         // Find errors in the distance and angle it needs to turn to to get to the desired point.
         double lateral_error = distance_between_points(*this, target);
-        double turn_error = rad_to_deg(atan2(target.get_y() - y, target.get_x() - x) - deg_to_rad(get_heading()));
+        double turn_error = reduce_negative_180_to_180(
+            rad_to_deg(atan2(target.get_y() - y, target.get_x() - x) - deg_to_rad(get_heading()))
+        );
 
         // Reverse turning and driving so the robot drives backwards if the back of the robot is facing the target.
-        if (fabs(turn_error) > 90) {
+        if (fabs(turn_error) > 90 || reversed) {
             lateral_error *= -1;
             turn_error -= 180 * sign(turn_error);
         }
@@ -202,7 +204,7 @@ void Drive::drive_to_point(double target_x, double target_y, double max_drive_vo
 
         // Scale the drive voltage to be smaller based on how much the robot is facing the target. This way, the robot
         // will drive forward slower if it is not directly facing the point.
-        drive_voltage *= cos(deg_to_rad(turn_error));
+        drive_voltage *= cos(deg_to_rad(turn_error / 2));
 
         // Keep the voltages within the limits given by the parameters.
         drive_voltage = clamp(drive_voltage, max_drive_voltage);

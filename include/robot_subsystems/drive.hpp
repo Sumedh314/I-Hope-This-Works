@@ -54,7 +54,7 @@ class Drive : public Point{
         void split_arcade();
         void drive_distance_with_IME(double target, double max_voltage = 127, double max_acceleration = 6);
         void drive_distance(double target, double max_voltage = 127);
-        void drive_to_point(double target_x, double target_y, double max_drive_voltage = 127, double max_turn_voltage = 127, double turn_limit = 7);
+        void drive_to_point(double target_x, double target_y, bool reversed = false, double max_drive_voltage = 127, double max_turn_voltage = 127, double turn_limit = 7);
         void turn_to_heading(double degrees, double max_voltage = 127);
         void turn_to_point(double target_x, double target_y, double max_voltage = 127);
         void follow_path(double path[25][2], int path_length, int forward_voltage = 127, int direction = 1);
