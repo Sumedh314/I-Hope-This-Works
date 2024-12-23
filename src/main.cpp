@@ -150,6 +150,7 @@ void autonomous() {
 			break;
 		case 2:
 			blue_left();
+			break;
 		case 3:
 			blue_right();
 			break;
@@ -169,11 +170,9 @@ void autonomous() {
 */
 void print_odom() {
 	while (true) {
-        controller.print(0, 0, "X coor: %f", robot.get_x());
+        controller.print(2, 0, "(%0.2f, %0.2f)  ", robot.get_x(), robot.get_y());
         pros::delay(50);
-        controller.print(1, 0, "Y coor: %f", robot.get_y());
-        pros::delay(50);
-        controller.print(2, 0, "Heading: %f", robot.get_heading());
+        controller.print(2, 14, "   %0.2f°  ", robot.get_heading());
         pros::delay(50);
 	}
 }
@@ -205,68 +204,61 @@ void dont_get_DQed() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	double xcoor = 0;
-	double ycoor = 0;
-
-	// inertial.reset();
-	// inertial.set_rotation(0);
-	// red_right();
-
-	// The robot starts facing 90 degrees (forward).
-	robot.set_original_heading(90);
-	// robot.set_coordinates(-14.5, -60);
-
-	// Start tasks.
+	pros::Task drive([](){robot.split_arcade();});
 	pros::Task spin(spin_intake);
 	pros::Task toggle(toggle_clamp);
 	pros::Task vibrate_controller(dont_get_DQed);
 
-	// robot.drive_distance_with_IME(24);
-	// robot.drive_distance_with_IME(-24);
+	while (true) {
+		if (
+			controller.get_digital(pros::E_CONTROLLER_DIGITAL_A) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_B) ||
+			controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_X) ||
+			controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)
+		) {
+			if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
+				auton_index = 0;
+			}
+			if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
+				auton_index = 1;
+			}
+			if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
+				auton_index = 2;
+			}
+			if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_X)) {
+				auton_index = 3;
+			}
+			if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
+				auton_index = 4;
+			}
+			if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
+				auton_index = -1;
+			}
 
-	pros::delay(2000);
-	pros::Task odom([](){robot.update_odometry();});
-	// pros::Task print(print_odom);
+			drive.suspend();
+			spin.suspend();
+			toggle.suspend();
 
-	// while (true) {
-	// 	if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT)) {
-	// 		robot.turn_to_point(xcoor - 12, ycoor);
-	// 		robot.drive_to_point(xcoor - 12, ycoor);
-	// 		xcoor -= 12;
-	// 	}
-	// 	if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP)) {
-	// 		robot.turn_to_point(xcoor, ycoor + 12);
-	// 		robot.drive_to_point(xcoor, ycoor + 12);
-	// 		ycoor += 12;
-	// 	}
-	// 	if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
-	// 		robot.turn_to_point(xcoor + 12, ycoor);
-	// 		robot.drive_to_point(xcoor + 12, ycoor);
-	// 		xcoor += 12;
-	// 	}
-	// 	if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN)) {
-	// 		robot.turn_to_point(xcoor, ycoor - 12);
-	// 		robot.drive_to_point(xcoor, ycoor - 12);
-	// 		ycoor -= 12;
-	// 	}
-	// 	pros::delay(10);
-	// }
+			controller.print(2, 0, "Loading...");
+			inertial.reset();
+			pros::delay(2000);
+			robot.set_original_heading(90);
+
+			pros::Task odom([](){robot.update_odometry();});
+			pros::Task print(print_odom);
+
+			autonomous();
+
+			drive.resume();
+			spin.resume();
+			toggle.resume();
+
+			break;
+		}
+		pros::delay(50);
+	}
 
 	// double path[25][2] = {{0, 0}, {6, 12}, {24, 12}, {48, -12}, {24, -24}, {0, -12}, {0, 0}};
 	// double path2[5][2] = {{0, 0}, {12, 12}, {24, 0}, {12, -12}, {0, 0}};
 	// robot.follow_path(path2, 5, 127, 1);
 	// robot.turn_to_heading(90);
-
-	// while (true) {
-	// 	robot.drive_to_point(0, 0);
-	// 	pros::delay(10);
-	// }
-
-	pros::Task drive([](){robot.split_arcade();});
-
-	// Calibrate inertial sensor, wait for it to calibrate, and start odometry after a button on the controller is pressed.
-	// while (!controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)) {
-	// 	pros::delay(50);
-	// }
-	// controller.clear();
 }

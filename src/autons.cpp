@@ -45,13 +45,9 @@ void red_left() {
 
 	robot.set_coordinates(-14.5, -60);
 	robot.set_original_heading(180);
-	pros::delay(100);
-	pros::Task odom([](){robot.update_odometry();});
-	pros::delay(100);
-	pros::Task print(print_odom);
 
 	robot.drive_distance(-15);
-	robot.turn_to_heading(87);
+	robot.turn_to_heading(87, 1);
 	robot.drive_distance(-3.7);
 	pros::delay(300);
 	intake_on();
@@ -91,13 +87,9 @@ void red_left() {
 void red_right() {
 	robot.set_coordinates(14.5, -60);
 	robot.set_original_heading(0);
-	pros::delay(100);
-	pros::Task odom([](){robot.update_odometry();});
-	pros::delay(100);
-	pros::Task print(print_odom);
 
 	robot.drive_distance(-15);
-	robot.turn_to_heading(93);
+	robot.turn_to_heading(93, 1);
 	robot.drive_distance(-3.7);
 	pros::delay(300);
 	intake_on();
