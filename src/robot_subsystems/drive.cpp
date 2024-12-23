@@ -169,7 +169,7 @@ void Drive::drive_distance(double target, double max_voltage) {
  * Uses PID and odometry to drive the robot to a point on the field.
  * TODO: figure out correct PID constants.
 */
-void Drive::drive_to_point(double target_x, double target_y, bool reversed, double max_drive_voltage, double max_turn_voltage, double turn_limit) {
+void Drive::drive_to_point(double target_x, double target_y, int direction, double max_drive_voltage, double max_turn_voltage, double turn_limit) {
     double turn_voltage = 0;
 
     // Make the target a Point object.
@@ -185,7 +185,7 @@ void Drive::drive_to_point(double target_x, double target_y, bool reversed, doub
         );
 
         // Reverse turning and driving so the robot drives backwards if the back of the robot is facing the target.
-        if (fabs(turn_error) > 90 || reversed) {
+        if ((fabs(turn_error) > 90 || direction == -1) && direction != 1) {
             lateral_error *= -1;
             turn_error -= 180 * sign(turn_error);
         }
@@ -204,7 +204,10 @@ void Drive::drive_to_point(double target_x, double target_y, bool reversed, doub
 
         // Scale the drive voltage to be smaller based on how much the robot is facing the target. This way, the robot
         // will drive forward slower if it is not directly facing the point.
-        drive_voltage *= cos(deg_to_rad(turn_error / 2));
+        drive_voltage *= cos(deg_to_rad(turn_error));
+        if (fabs(turn_error) > 90) {
+            drive_voltage = 0;
+        }
 
         // Keep the voltages within the limits given by the parameters.
         drive_voltage = clamp(drive_voltage, max_drive_voltage);
@@ -228,17 +231,22 @@ void Drive::drive_to_point(double target_x, double target_y, bool reversed, doub
  * Uses the PID class to turn to a certain heading. First accelerates to full speed smoothly and then begins the PID.
  * TODO: figure out correct PID constants.
 */
-void Drive::turn_to_heading(double target, double max_voltage) {
+void Drive::turn_to_heading(double target, int direction, double max_voltage) {
 
     // Keep going until the robot is settled, either by reaching the desired distance or by getting stuck for too long.
     while (!turn_pid.is_settled()) {
 
-        // Get the current error and feet it into the PID controller.
+        // Get the current error.
         double position = get_heading();
         double error = reduce_negative_180_to_180(target - position);
-        double voltage = turn_pid.compute(error);
 
-        // Clamp the voltage to the allowed range.
+        // Reverse turning and driving so the robot drives backwards if the back of the robot is facing the target.
+        if ((fabs(error) > 90 || direction == -1) && direction != 1) {
+            error -= 180 * sign(error);
+        }
+
+        // Feed error into the PID controller and clamp the outputted voltage.
+        double voltage = turn_pid.compute(error);
         voltage = clamp(voltage, max_voltage);
 
         // Output voltages and delay for next loop.
@@ -250,7 +258,7 @@ void Drive::turn_to_heading(double target, double max_voltage) {
     brake();
 }
 
-void Drive::turn_to_point(double target_x, double target_y, double max_voltage) {
+void Drive::turn_to_point(double target_x, double target_y, int direction, double max_voltage) {
 
     // Make the target a Point object.
     Point target(target_x, target_y);
@@ -260,10 +268,17 @@ void Drive::turn_to_point(double target_x, double target_y, double max_voltage) 
 
         // Get the current error and feet it into the PID controller.
         double position = get_heading();
-        double error = rad_to_deg(atan2(target.get_y() - y, target.get_x() - x) - deg_to_rad(get_heading()));
-        double voltage = turn_pid.compute(error);
+        double error = reduce_negative_180_to_180(
+            rad_to_deg(atan2(target.get_y() - y, target.get_x() - x) - deg_to_rad(get_heading()))
+        );
 
-        // Clamp the voltage to the allowed range.
+        // Reverse turning and driving so the robot drives backwards if the back of the robot is facing the target.
+        if ((fabs(error) > 90 || direction == -1) && direction != 1) {
+            error -= 180 * sign(error);
+        }
+
+        // Feed error into the PID controller and clamp the outputted voltage.
+        double voltage = turn_pid.compute(error);
         voltage = clamp(voltage, max_voltage);
 
         // Output voltages and delay for next loop.
@@ -415,7 +430,12 @@ void Drive::follow_path(double path[25][2], int path_length, int forward_voltage
 
         // Move robot
         // double turn_voltage = TRACK_WIDTH * sin(deg_to_rad(turn_error)) / lookahead_radius * forward_voltage;
-        double turn_voltage = turn_error * kP;
+        double turn_voltage = turn_error * kP;// Prevent the sum of drive_voltage and turn_voltage from being greater than the maximum allowed voltage.
+        if (fabs(forward_voltage) + fabs(turn_voltage) > 127) {
+
+            // Essentially the same as drive_voltage = 127 - turn_voltage, but accounts for sign changes.
+            forward_voltage = (127 - fabs(turn_voltage)) * sign(forward_voltage);
+        }
         double new_forward_voltage = forward_voltage - 3 * fabs(turn_voltage);
         printf("forward voltage: %f\n", new_forward_voltage);
         printf("turn voltage: %f\n", turn_voltage);

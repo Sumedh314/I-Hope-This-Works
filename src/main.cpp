@@ -188,7 +188,7 @@ void dont_get_DQed() {
 	while (pros::millis() - start <= 90000) {
 		pros::delay(50);
 	}
-	controller.rumble("_");
+	controller.rumble("-");
 }
 
 /**
@@ -205,13 +205,16 @@ void dont_get_DQed() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	inertial.reset();
-	pros::delay(3000);
-	red_right();
+	double xcoor = 0;
+	double ycoor = 0;
+
+	// inertial.reset();
+	// inertial.set_rotation(0);
+	// red_right();
 
 	// The robot starts facing 90 degrees (forward).
-	robot.set_original_heading(180);
-	robot.set_coordinates(-14.5, -60);
+	robot.set_original_heading(90);
+	// robot.set_coordinates(-14.5, -60);
 
 	// Start tasks.
 	pros::Task spin(spin_intake);
@@ -221,51 +224,43 @@ void opcontrol() {
 	// robot.drive_distance_with_IME(24);
 	// robot.drive_distance_with_IME(-24);
 
-	// pros::Task odom([](){robot.update_odometry();});
-	pros::delay(100);
+	pros::delay(2000);
+	pros::Task odom([](){robot.update_odometry();});
 	// pros::Task print(print_odom);
 
+	// while (true) {
+	// 	if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT)) {
+	// 		robot.turn_to_point(xcoor - 12, ycoor);
+	// 		robot.drive_to_point(xcoor - 12, ycoor);
+	// 		xcoor -= 12;
+	// 	}
+	// 	if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP)) {
+	// 		robot.turn_to_point(xcoor, ycoor + 12);
+	// 		robot.drive_to_point(xcoor, ycoor + 12);
+	// 		ycoor += 12;
+	// 	}
+	// 	if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
+	// 		robot.turn_to_point(xcoor + 12, ycoor);
+	// 		robot.drive_to_point(xcoor + 12, ycoor);
+	// 		xcoor += 12;
+	// 	}
+	// 	if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN)) {
+	// 		robot.turn_to_point(xcoor, ycoor - 12);
+	// 		robot.drive_to_point(xcoor, ycoor - 12);
+	// 		ycoor -= 12;
+	// 	}
+	// 	pros::delay(10);
+	// }
 
-	// robot.drive_to_point(96, 0);
-	// robot.drive_to_point(96, 96);
-	// // robot.drive_to_point(0, 96);
-	// robot.drive_to_point(0, 0);
-	// robot.turn_to_heading(90);
-
-	// robot.drive_distance(36);
-	// robot.drive_distance(-36);
-
-	// robot.turn_to_heading(180);
-	// pros::delay(500);
-	// robot.turn_to_heading(0);
-	// pros::delay(500);
-	// robot.turn_to_heading(90);
-
-	// robot.drive_to_point(24, -1);
-	// robot.turn_to_heading(0);
-	// robot.drive_to_point(48, 12);
-	// robot.turn_to_heading(90);
-	// robot.drive_to_point(0, 0);
-
-	// double path[25][2] = {{0, 0}, {-6, 12}, {12, 12}, {18, 12}, {24, 6}, {18, -6}, {0, 0}};
-	// robot.follow_path(path, 7, 127, 1);
+	// double path[25][2] = {{0, 0}, {6, 12}, {24, 12}, {48, -12}, {24, -24}, {0, -12}, {0, 0}};
+	// double path2[5][2] = {{0, 0}, {12, 12}, {24, 0}, {12, -12}, {0, 0}};
+	// robot.follow_path(path2, 5, 127, 1);
 	// robot.turn_to_heading(90);
 
 	// while (true) {
 	// 	robot.drive_to_point(0, 0);
 	// 	pros::delay(10);
 	// }
-
-	// robot.turn_to_heading(0);
-	// robot.drive_to_point(36, 36);
-	// robot.turn_to_heading(90);
-	// robot.drive_to_point(96, 96);
-	// robot.turn_to_heading(180);
-	// robot.drive_to_point(0, 72);
-	// robot.turn_to_heading(270);
-	// robot.drive_to_point(0, 0);
-	// robot.drive_distance(48);
-	// robot.drive_distance(-48);
 
 	pros::Task drive([](){robot.split_arcade();});
 

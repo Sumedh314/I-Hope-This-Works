@@ -64,17 +64,13 @@ void red_left() {
 	robot.set_drive_voltages(-127);
 	pros::delay(300);
 	robot.drive_distance(5);
-	robot.set_drive_voltages(127, -127);
-	pros::delay(300);
-	robot.drive_to_point(-19, -34);
+	robot.drive_to_point(-19, -34, -1);
 	pros::delay(500);
 	robot.drive_distance(-12, 100);
 	clamp_goal();
 	pros::delay(500);
-	robot.set_drive_voltages(127, -127);
 	intake_on();
-	pros::delay(300);
-	robot.drive_to_point(-50, -24);
+	robot.drive_to_point(-50, -24, 1);
 	pros::delay(500);
 	robot.drive_distance(-5);
 	pros::delay(1000);
@@ -89,9 +85,7 @@ void red_left() {
 	pros::delay(2000);
 	robot.drive_distance(-5);
 	robot.drive_to_point(-24, -24);
-	robot.set_drive_voltages(127, -127);
-	pros::delay(300);
-	robot.drive_to_point(-3, -12);
+	robot.drive_to_point(-3, -12, 1);
 }
 
 void red_right() {
@@ -116,24 +110,18 @@ void red_right() {
 	robot.set_drive_voltages(-127);
 	pros::delay(300);
 	robot.drive_distance(5);
-	robot.set_drive_voltages(-127, 127);
-	pros::delay(300);
-	robot.drive_to_point(21, -34);
+	robot.drive_to_point(21, -34, -1);
 	pros::delay(500);
 	robot.drive_distance(-10, 100);
-	clamp_goal();
+	// clamp_goal();
 	pros::delay(500);
-	robot.set_drive_voltages(-127, 127);
 	intake_on();
-	pros::delay(300);
-	robot.drive_to_point(50, -24);
+	robot.drive_to_point(50, -24, 1);
 	pros::delay(500);
 	robot.drive_distance(-10);
 	pros::delay(2000);
 	intake_off();
-	robot.set_drive_voltages(-127, 127);
-	pros::delay(300);
-	robot.drive_to_point(12, -10);
+	robot.drive_to_point(12, -10, 1);
 }
 
 void blue_left() {
