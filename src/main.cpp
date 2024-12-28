@@ -44,7 +44,6 @@ void on_center_button() {
  */
 void initialize() {
 	pros::lcd::initialize();
-	pros::lcd::set_text(1, "Hello PROS User!");
 
 	pros::lcd::register_btn1_cb(on_center_button);
 
@@ -54,8 +53,6 @@ void initialize() {
 	front_right.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
 	middle_right.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
 	back_right.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
-
-	intake.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 }
 
 /**
@@ -110,7 +107,7 @@ void competition_initialize() {
 		}
 
 		// Auton will just drive forward if intake is too far forward. Prints the choice to the brain and controller.
-		else if (auton_index > sizeof(autons) / sizeof(const char*)) {
+		else if (auton_index > sizeof(autons) / sizeof(const char*) - 1) {
 			pros::lcd::print(0, "Auton: drive forward 10 inches");
 			controller.print(0, 0, "Auton: drive forward");
 		}
@@ -122,6 +119,9 @@ void competition_initialize() {
 		}
 		pros::delay(50);
 	}
+
+	// Set intake stopping to hold for the rest of the match.
+	intake.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 }
 
 /**
@@ -191,6 +191,18 @@ void dont_get_DQed() {
 }
 
 /**
+ * Ends the program when controller button LEFT is pressed.
+*/
+void e_stop() {
+	while (true) {
+		if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT)) {
+			at_quick_exit(0);
+		}
+		pros::delay(50);
+	}
+}
+
+/**
  * Runs the operator control code. This function will be started in its own task
  * with the default priority and stack size whenever the robot is enabled via
  * the Field Management System or the VEX Competition Switch in the operator
@@ -204,6 +216,7 @@ void dont_get_DQed() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+	pros::Task stop(e_stop);
 	pros::Task drive([](){robot.split_arcade();});
 	pros::Task spin(spin_intake);
 	pros::Task toggle(toggle_clamp);
@@ -246,7 +259,10 @@ void opcontrol() {
 			pros::Task odom([](){robot.update_odometry();});
 			pros::Task print(print_odom);
 
-			autonomous();
+			// autonomous();
+			double path[6][2] = {{0, 0}, {6, 12}, {24, 18}, {30, 0}, {15, -6}, {0, 0}};
+			robot.follow_path(path, 6, 20);
+			robot.turn_to_heading(90);
 
 			drive.resume();
 			spin.resume();
@@ -256,9 +272,4 @@ void opcontrol() {
 		}
 		pros::delay(50);
 	}
-
-	// double path[25][2] = {{0, 0}, {6, 12}, {24, 12}, {48, -12}, {24, -24}, {0, -12}, {0, 0}};
-	// double path2[5][2] = {{0, 0}, {12, 12}, {24, 0}, {12, -12}, {0, 0}};
-	// robot.follow_path(path2, 5, 127, 1);
-	// robot.turn_to_heading(90);
 }

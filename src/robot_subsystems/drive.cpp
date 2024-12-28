@@ -84,6 +84,15 @@ void Drive::split_arcade() {
     }
 }
 
+void Drive::curvature_drive() {
+    while (true) {
+        double left_value = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+        double right_value = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+
+        // double left_voltage = 
+    }
+}
+
 /**
  * Uses the PID class to drive a certain distance. First accelerates to full speed smoothly and then begins the PID.
  * This function uses the Integrated Motor Encoders to get the position of the wheels and does not use odometry.
@@ -291,6 +300,14 @@ void Drive::turn_to_point(double target_x, double target_y, int direction, doubl
 }
 
 /**
+ * Frist turns the robot towards the desired point and then drives there.
+*/
+void Drive::turn_and_drive_to_point(double target_x, double target_y, int turn_direction = 0, int drive_direction = 0, double max_drive_voltage = 127, double max_turn_voltage = 127) {
+    turn_to_point(target_x, target_y, turn_direction, max_turn_voltage);
+    drive_to_point(target_x, target_y, drive_direction, max_drive_voltage, max_turn_voltage);
+}
+
+/**
  * Uses the pure pursuit algorithm to follow a path.
  * NOTE: this probably does not work well at all. It is almost completely copied and pasted from last year's code. I
  * mostly used this guide to make this function: https://wiki.purduesigbots.com/software/control-algorithms/basic-pure-pursuit
@@ -304,7 +321,7 @@ void Drive::follow_path(double path[25][2], int path_length, int forward_voltage
     int last_index = 1;
     
     // A proportional constant for adjusting the heading. I just chose a value for this that worked.
-    double kP = 0.4;
+    double kP = 1;
 
     // The endopints of the line from the path that the robot is currently following.
     Point prev_point(0, 0);
@@ -429,14 +446,14 @@ void Drive::follow_path(double path[25][2], int path_length, int forward_voltage
         printf("Turn error: %f\n", turn_error);
 
         // Move robot
-        // double turn_voltage = TRACK_WIDTH * sin(deg_to_rad(turn_error)) / lookahead_radius * forward_voltage;
-        double turn_voltage = turn_error * kP;// Prevent the sum of drive_voltage and turn_voltage from being greater than the maximum allowed voltage.
-        if (fabs(forward_voltage) + fabs(turn_voltage) > 127) {
+        double turn_voltage = TRACK_WIDTH * sin(deg_to_rad(turn_error)) / lookahead_radius * forward_voltage;
+        // double turn_voltage = turn_error * kP;// Prevent the sum of drive_voltage and turn_voltage from being greater than the maximum allowed voltage.
+        double new_forward_voltage = forward_voltage - 0 * fabs(turn_voltage);
+        if (fabs(new_forward_voltage) + fabs(turn_voltage) > 127) {
 
             // Essentially the same as drive_voltage = 127 - turn_voltage, but accounts for sign changes.
-            forward_voltage = (127 - fabs(turn_voltage)) * sign(forward_voltage);
+            new_forward_voltage = (127 - fabs(turn_voltage)) * sign(forward_voltage);
         }
-        double new_forward_voltage = forward_voltage - 3 * fabs(turn_voltage);
         printf("forward voltage: %f\n", new_forward_voltage);
         printf("turn voltage: %f\n", turn_voltage);
         set_drive_voltages(-turn_voltage + new_forward_voltage * direction, turn_voltage + new_forward_voltage * direction);
