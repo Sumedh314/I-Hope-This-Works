@@ -85,7 +85,7 @@ void red_right() {
 	robot.drive_to_point(21, -34, -1);
 	pros::delay(500);
 	robot.drive_distance(-10, 100);
-	// clamp_goal();
+	clamp_goal();
 	pros::delay(500);
 
 	// Score ring onto the goal.
@@ -126,7 +126,7 @@ void blue_left() {
 	robot.drive_to_point(-21, -34, -1);
 	pros::delay(500);
 	robot.drive_distance(-10, 100);
-	// clamp_goal();
+	clamp_goal();
 	pros::delay(500);
 
 	// Score ring onto the goal.
@@ -209,28 +209,57 @@ void skills_autonomous() {
 	// Stop intake and pick up goal.
 	intake_off();
 	robot.drive_to_point(0, -48);
-	robot.turn_to_heading(180);
+	robot.turn_to_heading(0, -1);
 	robot.drive_distance(-16);
-	clamp_goal();
+	// clamp_goal();
 
 	// Start intake and attempt to pick up another ring.
-	robot.turn_to_heading(90);
 	intake_on();
-	robot.drive_to_point(24, -24);
+	robot.turn_and_drive_to_point(24, -24, 1);
 
 	// Pick up ring in the middle of the field.
 	robot.turn_and_drive_to_point(0, 0);
 	pros::delay(500);
 
-	// Pick up rings in the corner of the field.
+	// Pick up ring next to robot.
 	robot.drive_to_point(24, -24);
 	robot.turn_and_drive_to_point(48, -24, 1, 1);
-	robot.turn_and_drive_to_point(48, -50, 1, 1);
+
+	// Pick up rings in the corner of the field.
+	robot.turn_and_drive_to_point(48, -40, 1, 1);
+	pros::delay(500);
+	robot.drive_distance(7);
 	robot.turn_and_drive_to_point(54, -48, 1, 1);
 
 	// Put goal in the corner
-	robot.turn_to_point(60, -60);
+	robot.turn_to_point(60, -60, -1);
 	robot.drive_distance(-5);
-	unclamp_goal();
+	// unclamp_goal();
+	intake_off();
+
+	// Pick up other goal on this side of the field.
+	robot.drive_distance(5);
+	robot.turn_and_drive_to_point(-16, -48, -1, -1);
+	// clamp_goal();
+
+	// Score ring in front of the goal.
+	intake_on();
+	robot.turn_and_drive_to_point(-24, -24, 1, 1);
+
+	// Score two more rings.
+	robot.drive_to_point(-48, -24);
+	robot.drive_to_point(-60, 0);
+
+	// Score rings in the corner of the field.
+	robot.drive_to_point(-48, -24);
+	robot.turn_and_drive_to_point(-48, -40, 1, 1);
+	pros::delay(500);
+	robot.drive_distance(7);
+	robot.turn_and_drive_to_point(-54, -48, 1, 1);
+
+	// Put goal in the corner.
+	robot.turn_to_point(-60, -60, -1);
+	robot.drive_distance(-5);
+	// unclamp_goal();
 	intake_off();
 }

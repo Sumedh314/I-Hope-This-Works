@@ -84,12 +84,38 @@ void Drive::split_arcade() {
     }
 }
 
+/**
+ * Controls the robot with the controller using "curvature drive" control. The left joystick controls the throttle,
+ * and the right joystick controls the radius of curvature. If the throttle is increased and the right joystick remains
+ * in the same position, the robot will drive in the same circle, but faster.
+*/
 void Drive::curvature_drive() {
     while (true) {
         double left_value = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         double right_value = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
 
-        // double left_voltage = 
+        double left_voltage = 0;
+        double right_voltage = 0;
+
+        // Scales the
+        if (right_value > 0) {
+            left_voltage = 1;
+            right_voltage = 1 - right_value * 2 / 127;
+        }
+        else if (right_value < 0) {
+            left_voltage = 1 + right_value * 2 / 127;
+            right_voltage = 1;
+        }
+        else {
+            left_voltage = 1;
+            right_voltage = 1;
+        }
+
+        left_voltage *= left_value;
+        right_voltage *= left_value;
+
+        set_drive_voltages(left_voltage, right_voltage);
+        pros::delay(20);
     }
 }
 
@@ -302,7 +328,7 @@ void Drive::turn_to_point(double target_x, double target_y, int direction, doubl
 /**
  * Frist turns the robot towards the desired point and then drives there.
 */
-void Drive::turn_and_drive_to_point(double target_x, double target_y, int turn_direction = 0, int drive_direction = 0, double max_drive_voltage = 127, double max_turn_voltage = 127) {
+void Drive::turn_and_drive_to_point(double target_x, double target_y, int turn_direction, int drive_direction, double max_drive_voltage, double max_turn_voltage) {
     turn_to_point(target_x, target_y, turn_direction, max_turn_voltage);
     drive_to_point(target_x, target_y, drive_direction, max_drive_voltage, max_turn_voltage);
 }
