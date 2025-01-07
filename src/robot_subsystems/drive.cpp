@@ -85,41 +85,6 @@ void Drive::split_arcade() {
 }
 
 /**
- * Controls the robot with the controller using "curvature drive" control. The left joystick controls the throttle,
- * and the right joystick controls the radius of curvature. If the throttle is increased and the right joystick remains
- * in the same position, the robot will drive in the same circle, but faster.
-*/
-void Drive::curvature_drive() {
-    while (true) {
-        double left_value = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
-        double right_value = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
-
-        double left_voltage = 0;
-        double right_voltage = 0;
-
-        // Scales the
-        if (right_value > 0) {
-            left_voltage = 1;
-            right_voltage = 1 - right_value * 2 / 127;
-        }
-        else if (right_value < 0) {
-            left_voltage = 1 + right_value * 2 / 127;
-            right_voltage = 1;
-        }
-        else {
-            left_voltage = 1;
-            right_voltage = 1;
-        }
-
-        left_voltage *= left_value;
-        right_voltage *= left_value;
-
-        set_drive_voltages(left_voltage, right_voltage);
-        pros::delay(20);
-    }
-}
-
-/**
  * Uses the PID class to drive a certain distance. First accelerates to full speed smoothly and then begins the PID.
  * This function uses the Integrated Motor Encoders to get the position of the wheels and does not use odometry.
  * TODO: figure out correct PID constants.
