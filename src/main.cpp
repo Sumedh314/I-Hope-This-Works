@@ -10,13 +10,8 @@
 PID drive_pid_IME(20.5, 0, 1.7, 10, 1, 1);
 PID drive_pid(8, 0, 0.2, 5, 2, 1);
 PID turn_pid(2.86, 1, 0.2, 15, 3, 3);
-// Drive robot(
-// 	3.25, 7, 0.1, 2.25, 36, 60, 2.8,
-// 	front_left, middle_left, back_left, front_right, middle_right, back_right, inertial, vertical, horizontal,
-// 	controller, drive_pid_IME, drive_pid, turn_pid
-// );
 Drive robot(
-	3.25, 7, 0.1, 2.25, 36, 60, 6,
+	3.25, 7, 0.1, 2.25, 36, 60, 2.8,
 	front_left, middle_left, back_left, front_right, middle_right, back_right, inertial, vertical, horizontal,
 	controller, drive_pid_IME, drive_pid, turn_pid
 );
@@ -222,7 +217,7 @@ void e_stop() {
  */
 void opcontrol() {
 	pros::Task stop(e_stop);
-	pros::Task drive([](){robot.curvature_drive();});
+	pros::Task drive([](){robot.split_arcade();});
 	pros::Task spin(spin_intake);
 	pros::Task toggle(toggle_clamp);
 	pros::Task vibrate_controller(dont_get_DQed);
@@ -236,19 +231,19 @@ void opcontrol() {
 			if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
 				auton_index = 0;
 			}
-			if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
+			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
 				auton_index = 1;
 			}
-			if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
+			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
 				auton_index = 2;
 			}
-			if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_X)) {
+			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_X)) {
 				auton_index = 3;
 			}
-			if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
+			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
 				auton_index = 4;
 			}
-			if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
+			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
 				auton_index = -1;
 			}
 
