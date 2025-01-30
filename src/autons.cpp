@@ -7,7 +7,7 @@
 void red_left() {
 
 	// Set original pose of the robot.
-	robot.set_coordinates(-14.5, -60);
+	robot.set_coordinates(-11.5, -63);
 	robot.set_original_heading(180);
 
 	// Score preload on the allaince steak.
@@ -27,21 +27,21 @@ void red_left() {
 
 	// Drive to goal and clamp it.
 	robot.drive_distance(5);
-	robot.drive_to_point(-19, -34, -1);
+	robot.drive_to_point(-16, -34, -1);
 	pros::delay(100);
-	robot.drive_distance(-12, 100);
+	robot.drive_distance(-10, 100);
 	clamp_goal();
 	pros::delay(200);
 
 	// Score ring onto the goal.
 	intake_on();
-	robot.drive_to_point(-50, -26, 1);
+	robot.drive_to_point(-44, -28, 1);
 	pros::delay(100);
 	robot.drive_distance(-7);
 	pros::delay(200);
 
 	// Score one of the rings near the autonomous line onto the goal.
-	robot.drive_to_point(-43, -11.5, 1);
+	robot.drive_to_point(-40, -12, 1);
 	pros::delay(100);
 	robot.drive_distance(-10);
 	pros::delay(200);
@@ -50,7 +50,7 @@ void red_left() {
 	// double path[5][2] = {{robot.get_x(), robot.get_y()}, {-45, -20}};
 	// robot.follow_path(path, 2, 60, -1);
 	robot.drive_to_point(-53, -22, -1);
-	robot.drive_to_point(-55, -11.5, 1);
+	robot.drive_to_point(-53, -11.5, 1);
 	pros::delay(100);
 	robot.drive_distance(-5);
 	pros::delay(200);
@@ -84,7 +84,7 @@ void red_right() {
 
 	// Drive to goal and clamp it.
 	robot.drive_distance(5);
-	robot.drive_to_point(20, -32, -1);
+	robot.drive_to_point(16, -34, -1);
 	pros::delay(100);
 	robot.drive_distance(-10, 100);
 	clamp_goal();
@@ -92,21 +92,21 @@ void red_right() {
 
 	// Score ring onto the goal.
 	intake_on();
-	robot.drive_to_point(50, -27, 1);
+	robot.drive_to_point(45, -28, 1);
 	pros::delay(100);
 
 	// Touch the ladder for the Autonomous Win Point.
 	robot.drive_distance(-10);
 	pros::delay(200);
 	intake_on(-127);
-	robot.drive_to_point(13, -12, 1);
+	robot.drive_to_point(6, -16, 1);
 	intake_off();
 }
 
 void blue_left() {
 
 	// Set original pose of the robot.
-	robot.set_coordinates(-14.5, -60);
+	robot.set_coordinates(-11.5, -63);
 	robot.set_original_heading(180);
 
 	// Score preload on the alliance steak.
@@ -126,7 +126,7 @@ void blue_left() {
 
 	// Drive to goal and clamp it.
 	robot.drive_distance(5);
-	robot.drive_to_point(-18, -32, -1);
+	robot.drive_to_point(-16, -34, -1);
 	pros::delay(200);
 	robot.drive_distance(-10, 100);
 	clamp_goal();
@@ -134,14 +134,14 @@ void blue_left() {
 
 	// Score ring onto the goal.
 	intake_on();
-	robot.drive_to_point(-50, -32, 1);
+	robot.drive_to_point(-45, -28, 1);
 	pros::delay(500);
 
 	// Touch the ladder for the Autonomous Win Point.
 	robot.drive_distance(-10);
 	pros::delay(200);
 	intake_on(-127);
-	// robot.drive_to_point(-10, -12, 1);
+	robot.drive_to_point(-6, -16, 1);
 }
 
 void blue_right() {
