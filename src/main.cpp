@@ -79,12 +79,12 @@ void competition_initialize() {
 
 	// Use the position of the intake to choose an autonomous routine. This is better than having separate programs for
 	// each autonomous routine because we don't have to manage multiple programs.
-	intake.set_zero_position(0);
+	intake_left.set_zero_position(0);
 
 	while (true) {
 		
 		// Each range of 90 degrees for the intake has a different auton_index
-		auton_index = floor(intake.get_position() / 90.0);
+		auton_index = floor(intake_left.get_position() / 90.0);
 
 		// Auton will do nothing if the intake is too far backward.
 		if (auton_index < -1) {
@@ -97,11 +97,14 @@ void competition_initialize() {
 			pros::lcd::print(0, "Calibrating IMU...");
 			controller.print(0, 0, "Calibrating IMU...");
 			inertial.reset(true);
+
+			pros::Task odom([](){robot.update_odometry();});
+
 			pros::lcd::print(0, "Done calibrating");
 			controller.print(0, 0, "Done calibrating");
 
 			// Wait until the intake is in a different position.
-			while (floor(intake.get_position() / 90.0) < 0 && floor(intake.get_position() / 90.0) >= -1) {
+			while (floor(intake_left.get_position() / 90.0) < 0 && floor(intake_left.get_position() / 90.0) >= -1) {
 				pros::delay(50);
 			}
 		}
@@ -121,7 +124,7 @@ void competition_initialize() {
 	}
 
 	// Set intake stopping to hold for the rest of the match.
-	intake.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	intake_left.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 }
 
 /**
@@ -152,7 +155,7 @@ void autonomous() {
 			blue_left();
 			break;
 		case 3:
-			blue_right();
+			blue_right();                                    
 			break;
 		case 4:
 			skills_autonomous();
@@ -178,16 +181,16 @@ void print_odom() {
 }
 
 /**
- * Vibrates the controller when there are 15 seconds left to alert the driver to not place goals in the positive corners.
+ * Vibrates the controller when there are 30 seconds left to alert the driver to not place goals in the positive corners.
 */
 void dont_get_DQed() {
 	int start = pros::millis();
 
-	// Wait until 90000 milliseconds (1 minute and 30 seconds) have passed.
+	// Wait until 75000 milliseconds (1 minute and 15 seconds) have passed.
 	while (pros::millis() - start <= 90000) {
 		pros::delay(50);
 	}
-	controller.rumble("-");
+	controller.rumble("--");
 }
 
 /**
@@ -216,6 +219,19 @@ void e_stop() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+	// controller.print(2, 0, "Loading...");
+	// inertial.reset();
+	// pros::delay(3000);
+
+	// pros::Task odom([](){robot.update_odometry();});
+	// pros::delay(1000);
+	// pros::Task print(print_odom);
+
+	// while (!controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
+	// 	pros::delay(50);
+	// }
+
+	// skills_autonomous();
 	pros::Task stop(e_stop);
 	pros::Task drive([](){robot.split_arcade();});
 	pros::Task spin(spin_intake);
