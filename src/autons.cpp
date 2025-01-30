@@ -37,11 +37,11 @@ void red_left() {
 	intake_on();
 	robot.drive_to_point(-44, -28, 1);
 	pros::delay(100);
-	robot.drive_distance(-7);
+	robot.drive_distance(-5);
 	pros::delay(200);
 
 	// Score one of the rings near the autonomous line onto the goal.
-	robot.drive_to_point(-40, -12, 1);
+	robot.drive_to_point(-40, -13, 1);
 	pros::delay(100);
 	robot.drive_distance(-10);
 	pros::delay(200);
@@ -50,7 +50,7 @@ void red_left() {
 	// double path[5][2] = {{robot.get_x(), robot.get_y()}, {-45, -20}};
 	// robot.follow_path(path, 2, 60, -1);
 	robot.drive_to_point(-53, -22, -1);
-	robot.drive_to_point(-53, -11.5, 1);
+	robot.drive_to_point(-52, -12, 1);
 	pros::delay(100);
 	robot.drive_distance(-5);
 	pros::delay(200);
@@ -58,7 +58,7 @@ void red_left() {
 
 	// Touch the ladder for the Autonomous Win Point.
 	robot.drive_to_point(-24, -24);
-	robot.drive_to_point(-3, -12, 1);
+	robot.drive_to_point(-6, -16, 1);
 }
 
 void red_right() {
