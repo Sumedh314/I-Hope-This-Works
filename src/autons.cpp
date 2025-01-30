@@ -64,7 +64,7 @@ void red_left() {
 void red_right() {
 
 	// Set original pose of the robot.
-	robot.set_coordinates(14.5, -60);
+	robot.set_coordinates(11.5, -63);
 	robot.set_original_heading(0);
 
 	// Score preload on the alliance steak.
@@ -84,7 +84,7 @@ void red_right() {
 
 	// Drive to goal and clamp it.
 	robot.drive_distance(5);
-	robot.drive_to_point(18, -32, -1);
+	robot.drive_to_point(20, -32, -1);
 	pros::delay(100);
 	robot.drive_distance(-10, 100);
 	clamp_goal();
