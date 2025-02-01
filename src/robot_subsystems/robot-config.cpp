@@ -14,6 +14,7 @@ pros::Motor intake_right(21, pros::v5::MotorGearset::blue, pros::v5::MotorEncode
 
 // Sensors
 pros::IMU inertial(16);
+pros::adi::DigitalIn auton_select(2);
 pros::adi::Encoder vertical(5, 6, false);
 pros::adi::Encoder horizontal(3, 4, false);
 

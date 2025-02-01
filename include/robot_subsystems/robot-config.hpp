@@ -13,6 +13,7 @@ extern pros::Motor intake_right;
 
 // Sensors
 extern pros::IMU inertial;
+extern pros::adi::DigitalIn auton_select;
 extern pros::adi::Encoder vertical;
 extern pros::adi::Encoder horizontal;
 

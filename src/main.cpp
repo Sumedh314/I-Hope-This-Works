@@ -18,7 +18,7 @@ Drive robot(
 
 // Auton number for auton selection and auton choices.
 int auton_index = 0;
-const char* autons[5] = {"red left", "red right", "blue left", "blue right", "skills"};
+const char* autons[6] = {"red left", "red right", "blue left", "blue right", "skills", "drive 10 inches"};
 
 /**
  * A callback function for LLEMU's center button.
@@ -53,6 +53,9 @@ void initialize() {
 	front_right.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
 	middle_right.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
 	back_right.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+
+	intake_left.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	intake_right.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 }
 
 /**
@@ -77,54 +80,57 @@ void disabled() {
  */
 void competition_initialize() {
 
-	// Use the position of the intake to choose an autonomous routine. This is better than having separate programs for
-	// each autonomous routine because we don't have to manage multiple programs.
-	intake_left.set_zero_position(0);
+	// Use the limit switch to choose an autonomous routine. This is better than having separate programs for each
+	// autonomous routine because we don't have to manage multiple programs.
+
+	auton_index = 0;
 
 	while (true) {
-		
-		// Each range of 90 degrees for the intake has a different auton_index
-		auton_index = floor(intake_left.get_position() / 90.0);
-
-		// Auton will do nothing if the intake is too far backward.
-		if (auton_index < -1) {
+		// Auton will do nothing if auton_index is equal to the length of autons.
+		if (auton_index == sizeof(autons) / sizeof(const char*)) {
 			pros::lcd::print(0, "Auton will do nothing.");
-			controller.print(0, 0, "Auton: nothing.");
+			controller.print(0, 0, "Auton: nothing");
 		}
 
-		// Calibrate sensor if intake moves backwards.
-		else if (auton_index < 0) {
-			pros::lcd::print(0, "Calibrating IMU...");
-			controller.print(0, 0, "Calibrating IMU...");
-			inertial.reset(true);
-
-			pros::Task odom([](){robot.update_odometry();});
-
-			pros::lcd::print(0, "Done calibrating");
-			controller.print(0, 0, "Done calibrating");
-
-			// Wait until the intake is in a different position.
-			while (floor(intake_left.get_position() / 90.0) < 0 && floor(intake_left.get_position() / 90.0) >= -1) {
-				pros::delay(50);
-			}
-		}
-
-		// Auton will just drive forward if intake is too far forward. Prints the choice to the brain and controller.
-		else if (auton_index > sizeof(autons) / sizeof(const char*) - 1) {
-			pros::lcd::print(0, "Auton: drive forward 10 inches");
-			controller.print(0, 0, "Auton: drive forward");
-		}
-
-		// Print the auton choice to the brain and controller.
+		// Choose one of the autons based on auton_index.
 		else {
 			pros::lcd::print(0, "Auton: %s", autons[auton_index]);
 			controller.print(0, 0, "Auton: %s", autons[auton_index]);
 		}
+
+		// Wait until limit switch is pressed.
+		while (auton_select.get_value() == LOW) {
+			pros::delay(50);
+		}
+
+		// Calibrate sensor if sensor is held pressed for 500 milliseconds.
+		int start = pros::millis();
+		while (auton_select.get_value() == HIGH) {
+			if (pros::millis() - start > 500) {
+				pros::lcd::print(0, "Calibrating IMU...");
+				controller.print(0, 0, "Calibrating IMU...");
+
+				inertial.reset(true);
+
+				pros::lcd::print(0, "Done calibrating");
+				controller.print(0, 0, "Done calibrating");
+				pros::delay(1000);
+
+				// Reduce because it will be increased after this loop while we want it to remain the same.
+				auton_index--;
+				
+				while (auton_select.get_value() == HIGH) {
+					pros::delay(50);
+				}
+			}
+			pros::delay(50);
+		}
+
+		// Increase auton_index by one and make it loop by using modulo.
+		auton_index++;
+		auton_index %= sizeof(autons) / sizeof(const char*) + 1;
 		pros::delay(50);
 	}
-
-	// Set intake stopping to hold for the rest of the match.
-	intake_left.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 }
 
 /**
@@ -140,9 +146,9 @@ void competition_initialize() {
  */
 void autonomous() {
 
-	// Set the autonomous index for the extreme cases for the intake.
-	auton_index = clamp(auton_index, -1, 5);
-	
+	// Start odometry task.
+	pros::Task odom([](){robot.update_odometry();});
+
 	// Execute the correct autonomous routine based on what was chosen in the competition_initialize() function.
 	switch (auton_index) {
 		case 0:
@@ -161,7 +167,7 @@ void autonomous() {
 			skills_autonomous();
 			break;
 		case 5:
-			robot.drive_distance(10);
+			drive_ten_inches();
 			break;
 		default:
 			break;
@@ -232,7 +238,7 @@ void opcontrol() {
 	// }
 
 	// skills_autonomous();
-	pros::Task stop(e_stop);
+	competition_initialize();
 	pros::Task drive([](){robot.split_arcade();});
 	pros::Task spin(spin_intake);
 	pros::Task toggle(toggle_clamp);
@@ -262,6 +268,7 @@ void opcontrol() {
 			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
 				auton_index = -1;
 			}
+			pros::Task stop(e_stop);
 
 			drive.suspend();
 			spin.suspend();

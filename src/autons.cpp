@@ -49,8 +49,8 @@ void red_left() {
 	// Score the other ring near the autonomous line onto the goal.
 	// double path[5][2] = {{robot.get_x(), robot.get_y()}, {-45, -20}};
 	// robot.follow_path(path, 2, 60, -1);
-	robot.drive_to_point(-53, -22, -1);
-	robot.drive_to_point(-52, -12, 1);
+	robot.drive_to_point(-48, -22, -1);
+	robot.drive_to_point(-50, -13, 1);
 	pros::delay(100);
 	robot.drive_distance(-5);
 	pros::delay(200);
@@ -238,20 +238,21 @@ void skills_autonomous() {
 	robot.turn_and_drive_to_point(48, -24, 1, 1);
 
 	// Pick up rings in the corner of the field.
-	robot.turn_and_drive_to_point(48, -42, 1, 1);
+	robot.turn_and_drive_to_point(44, -42, 1, 1);
 	pros::delay(1000);
 	robot.drive_distance(10);
 	pros::delay(1000);
+	robot.drive_distance(-20);
 	robot.turn_and_drive_to_point(54, -48, 1, 1);
 
 	// Put goal in the corner
 	robot.turn_to_point(60, -60, -1);
 	unclamp_goal();
-	robot.drive_distance(-10);
+	robot.drive_distance(-12);
 	intake_off();
 
 	// Pick up other goal on this side of the field.
-	robot.drive_distance(5);
+	robot.drive_distance(9);
 	robot.turn_and_drive_to_point(-16, -48, -1, -1);
 	pros::delay(200);
 	robot.drive_distance(-10, 100);
@@ -279,4 +280,8 @@ void skills_autonomous() {
 	robot.drive_distance(-5);
 	unclamp_goal();
 	intake_off();
+}
+
+void drive_ten_inches() {
+	robot.drive_distance(10);
 }
