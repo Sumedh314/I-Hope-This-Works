@@ -66,7 +66,7 @@ void initialize() {
 void disabled() {
 
 	// Make sure the robot isn't holding onto a goal at the end of the match.
-	unclamp_goal();
+	// unclamp_goal();
 }
 
 /**
@@ -80,12 +80,10 @@ void disabled() {
  */
 void competition_initialize() {
 
-	// Use the limit switch to choose an autonomous routine. This is better than having separate programs for each
+	// Uses the limit switch to choose an autonomous routine. This is better than having separate programs for each
 	// autonomous routine because we don't have to manage multiple programs.
-
-	auton_index = 0;
-
 	while (true) {
+
 		// Auton will do nothing if auton_index is equal to the length of autons.
 		if (auton_index == sizeof(autons) / sizeof(const char*)) {
 			pros::lcd::print(0, "Auton will do nothing.");
@@ -98,7 +96,7 @@ void competition_initialize() {
 			controller.print(0, 0, "Auton: %s", autons[auton_index]);
 		}
 
-		// Wait until limit switch is pressed.
+		// Wait for limit switch to be pressed.
 		while (auton_select.get_value() == LOW) {
 			pros::delay(50);
 		}
@@ -119,6 +117,7 @@ void competition_initialize() {
 				// Reduce because it will be increased after this loop while we want it to remain the same.
 				auton_index--;
 				
+				// Wait for limit switch to be released.
 				while (auton_select.get_value() == HIGH) {
 					pros::delay(50);
 				}
@@ -146,8 +145,9 @@ void competition_initialize() {
  */
 void autonomous() {
 
-	// Start odometry task.
+	// Start odometry tasks.
 	pros::Task odom([](){robot.update_odometry();});
+	pros::Task print(print_odom);
 
 	// Execute the correct autonomous routine based on what was chosen in the competition_initialize() function.
 	switch (auton_index) {
@@ -193,7 +193,7 @@ void dont_get_DQed() {
 	int start = pros::millis();
 
 	// Wait until 75000 milliseconds (1 minute and 15 seconds) have passed.
-	while (pros::millis() - start <= 90000) {
+	while (pros::millis() - start <= 75000) {
 		pros::delay(50);
 	}
 	controller.rumble("--");
@@ -225,69 +225,58 @@ void e_stop() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	// controller.print(2, 0, "Loading...");
-	// inertial.reset();
-	// pros::delay(3000);
-
-	// pros::Task odom([](){robot.update_odometry();});
-	// pros::delay(1000);
-	// pros::Task print(print_odom);
-
-	// while (!controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
-	// 	pros::delay(50);
-	// }
-
-	// skills_autonomous();
-	competition_initialize();
 	pros::Task drive([](){robot.split_arcade();});
 	pros::Task spin(spin_intake);
 	pros::Task toggle(toggle_clamp);
 	pros::Task vibrate_controller(dont_get_DQed);
 
+	int start = pros::millis();
 	while (true) {
-		if (
-			controller.get_digital(pros::E_CONTROLLER_DIGITAL_A) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_B) ||
-			controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_X) ||
-			controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)
-		) {
-			if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
-				auton_index = 0;
-			}
-			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
-				auton_index = 1;
-			}
-			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
-				auton_index = 2;
-			}
-			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_X)) {
-				auton_index = 3;
-			}
-			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
-				auton_index = 4;
-			}
-			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
-				auton_index = -1;
-			}
-			pros::Task stop(e_stop);
+		if (pros::millis() - start < 3000) {
+			if (
+				controller.get_digital(pros::E_CONTROLLER_DIGITAL_A) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_B) ||
+				controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_X) ||
+				controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)
+			) {
+				if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
+					auton_index = 0;
+				}
+				else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
+					auton_index = 1;
+				}
+				else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
+					auton_index = 2;
+				}
+				else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_X)) {
+					auton_index = 3;
+				}
+				else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
+					auton_index = 4;
+				}
+				else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
+					auton_index = 6;
+				}
+				pros::Task stop(e_stop);
 
-			drive.suspend();
-			spin.suspend();
-			toggle.suspend();
+				drive.suspend();
+				spin.suspend();
+				toggle.suspend();
 
-			controller.print(2, 0, "Loading...");
-			inertial.reset();
-			pros::delay(2000);
-			robot.set_original_heading(90);
+				controller.print(2, 0, "Loading...");
+				inertial.reset();
+				pros::delay(2000);
+				robot.set_original_heading(90);
 
-			pros::Task odom([](){robot.update_odometry();});
-			pros::Task print(print_odom);
+				autonomous();
 
-			autonomous();
+				drive.resume();
+				spin.resume();
+				toggle.resume();
 
-			drive.resume();
-			spin.resume();
-			toggle.resume();
-
+				break;
+			}
+		}
+		else {
 			break;
 		}
 		pros::delay(50);
