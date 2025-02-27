@@ -8,8 +8,10 @@ extern pros::Motor back_left;
 extern pros::Motor middle_right;
 extern pros::Motor back_right;
 
-extern pros::Motor intake_left;
-extern pros::Motor intake_right;
+extern pros::Motor intake;
+
+extern pros::Motor wall_stake;
+extern pros::Motor move_hood;
 
 // Sensors
 extern pros::IMU inertial;

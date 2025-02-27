@@ -2,6 +2,7 @@
 #include "robot_subsystems/robot-config.hpp"
 #include "robot_subsystems/drive.hpp"
 #include "robot_subsystems/intake.hpp"
+#include "robot_subsystems/wall_stake.hpp"
 #include "robot_subsystems/pneumatics.hpp"
 #include "util.hpp"
 #include "autons.hpp"
@@ -54,8 +55,10 @@ void initialize() {
 	middle_right.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
 	back_right.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
 
-	intake_left.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-	intake_right.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	intake.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+
+	wall_stake.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	move_hood.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 }
 
 /**
@@ -227,56 +230,52 @@ void e_stop() {
 void opcontrol() {
 	pros::Task drive([](){robot.split_arcade();});
 	pros::Task spin(spin_intake);
+	pros::Task wall(wall_stake_macro);
 	pros::Task toggle(toggle_clamp);
 	pros::Task vibrate_controller(dont_get_DQed);
 
 	int start = pros::millis();
-	while (true) {
-		if (pros::millis() - start < 3000) {
-			if (
-				controller.get_digital(pros::E_CONTROLLER_DIGITAL_A) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_B) ||
-				controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_X) ||
-				controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)
-			) {
-				if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
-					auton_index = 0;
-				}
-				else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
-					auton_index = 1;
-				}
-				else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
-					auton_index = 2;
-				}
-				else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_X)) {
-					auton_index = 3;
-				}
-				else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
-					auton_index = 4;
-				}
-				else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
-					auton_index = 6;
-				}
-				pros::Task stop(e_stop);
-
-				drive.suspend();
-				spin.suspend();
-				toggle.suspend();
-
-				controller.print(2, 0, "Loading...");
-				inertial.reset();
-				pros::delay(2000);
-				robot.set_original_heading(90);
-
-				autonomous();
-
-				drive.resume();
-				spin.resume();
-				toggle.resume();
-
-				break;
+	while (pros::millis() - start < 3000) {
+		if (
+			controller.get_digital(pros::E_CONTROLLER_DIGITAL_A) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_B) ||
+			controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_X) ||
+			controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)
+		) {
+			if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
+				auton_index = 0;
 			}
-		}
-		else {
+			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
+				auton_index = 1;
+			}
+			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
+				auton_index = 2;
+			}
+			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_X)) {
+				auton_index = 3;
+			}
+			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
+				auton_index = 4;
+			}
+			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
+				auton_index = 6;
+			}
+			pros::Task stop(e_stop);
+
+			drive.suspend();
+			spin.suspend();
+			toggle.suspend();
+
+			controller.print(2, 0, "Loading...");
+			inertial.reset();
+			pros::delay(2000);
+			robot.set_original_heading(90);
+
+			autonomous();
+
+			drive.resume();
+			spin.resume();
+			toggle.resume();
+
 			break;
 		}
 		pros::delay(50);
