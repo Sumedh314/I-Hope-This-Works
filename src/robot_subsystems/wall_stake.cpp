@@ -30,10 +30,10 @@ void wall_stake_macro() {
 
 void wall_stake_manual() {
     while (true) {
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_X)) {
             wall_stake.move(127);
         }
-        else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
+        else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
             wall_stake.move(-127);
         }
         else {
