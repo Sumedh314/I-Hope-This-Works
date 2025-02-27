@@ -280,4 +280,7 @@ void opcontrol() {
 		}
 		pros::delay(50);
 	}
+
+	pros::Task wall_manual(wall_stake_manual);
+	pros::Task hood(move_hood_manual);
 }
