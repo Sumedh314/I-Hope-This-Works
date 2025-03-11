@@ -9,8 +9,8 @@
 
 // Create PID and drivetrain objects used for the rest of the code.
 PID drive_pid_IME(20.5, 0, 1.7, 10, 1, 1);
-PID drive_pid(8, 0, 0.2, 5, 2, 1);
-PID turn_pid(2.86, 1, 0.2, 15, 3, 3);
+PID drive_pid(10, 0, 0.2, 5, 2, 1);
+PID turn_pid(3, 1, 0.2, 15, 3, 3);
 Drive robot(
 	3.25, 7, 0.1, 2.25, 36, 60, 2.8,
 	front_left, middle_left, back_left, front_right, middle_right, back_right, inertial, vertical, horizontal,

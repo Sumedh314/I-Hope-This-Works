@@ -11,7 +11,7 @@ pros::Motor back_right(20, pros::v5::MotorGearset::blue, pros::v5::MotorEncoderU
 
 pros::Motor intake(-18, pros::v5::MotorGearset::blue, pros::v5::MotorEncoderUnits::degrees);
 
-pros::Motor wall_stake(21, pros::v5::MotorGearset::green, pros::v5::MotorEncoderUnits::degrees);
+pros::Motor wall_stake(-21, pros::v5::MotorGearset::green, pros::v5::MotorEncoderUnits::degrees);
 pros::Motor move_hood(10, pros::v5::MotorGearset::green, pros::v5::MotorEncoderUnits::degrees);
 
 // Sensors
