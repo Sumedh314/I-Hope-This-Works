@@ -3,20 +3,20 @@
 
 void wall_stake_macro() {
     while (true) {
-        while (!controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
+        while (!controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)) {
             pros::delay(20);
         }
 
         wall_stake.move_relative(-35, 100);
         move_hood.move_relative(90, 100);
 
-        while (!controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
+        while (!controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)) {
             pros::delay(20);
         }
 
         wall_stake.move_relative(800, 100);
         
-        while (!controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
+        while (!controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)) {
             pros::delay(20);
         }
 
