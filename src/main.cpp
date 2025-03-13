@@ -9,7 +9,7 @@
 
 // Create PID and drivetrain objects used for the rest of the code.
 PID drive_pid_IME(20.5, 0, 1.7, 10, 1, 1);
-PID drive_pid(10, 0, 0.2, 5, 2, 1);
+PID drive_pid(10, 0, 0.2, 5, 3, 3);
 PID turn_pid(3, 1, 0.2, 15, 3, 3);
 Drive robot(
 	3.25, 7, 0.1, 2.25, 36, 60, 2.8,
@@ -58,7 +58,7 @@ void initialize() {
 	intake.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 
 	wall_stake.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-	move_hood.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	hood.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 }
 
 /**
@@ -151,6 +151,9 @@ void autonomous() {
 	// Start odometry tasks.
 	pros::Task odom([](){robot.update_odometry();});
 	pros::Task print(print_odom);
+
+	// Move wall stake mech up a little so the hood can move.
+	wall_stake.move_relative(170, 100);
 
 	// Execute the correct autonomous routine based on what was chosen in the competition_initialize() function.
 	switch (auton_index) {
