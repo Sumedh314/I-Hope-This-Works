@@ -17,6 +17,8 @@ Drive robot(
 	controller, drive_pid_IME, drive_pid, turn_pid
 );
 
+bool auton_happened = false;
+
 // Auton number for auton selection and auton choices.
 int auton_index = 0;
 const char* autons[6] = {"red left", "red right", "blue left", "blue right", "skills", "drive 10 inches"};
@@ -178,6 +180,8 @@ void autonomous() {
 		default:
 			break;
 	}
+
+	auton_happened = true;
 }
 
 /**
@@ -233,12 +237,19 @@ void e_stop() {
 void opcontrol() {
 	pros::Task drive([](){robot.split_arcade();});
 	pros::Task spin(spin_intake);
-	pros::Task wall(wall_stake_macro);
 	pros::Task toggle(toggle_clamp);
 	pros::Task vibrate_controller(dont_get_DQed);
 
 	int start = pros::millis();
-	while (pros::millis() - start < 3000) {
+
+	if (auton_happened) {
+		wall_stake.move_relative(-650, 200);
+		pros::delay(1500);
+	}
+    wall_stake.set_zero_position(0);
+	pros::Task wall(wall_stake_macro);
+
+	while (pros::millis() - start < 1500) {
 		if (
 			controller.get_digital(pros::E_CONTROLLER_DIGITAL_A) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_B) ||
 			controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_X) ||
@@ -270,7 +281,7 @@ void opcontrol() {
 
 			controller.print(2, 0, "Loading...");
 			inertial.reset();
-			pros::delay(2000);
+			pros::delay(2100);
 			robot.set_original_heading(90);
 
 			autonomous();

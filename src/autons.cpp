@@ -5,7 +5,7 @@
 #include "robot_subsystems/pneumatics.hpp"
 #include "robot_subsystems/robot-config.hpp"
 
-void alliance_steak() {
+void alliance_stake() {
 	robot.turn_to_heading(90, 1);
 	robot.drive_distance(-3.25);
 	pros::delay(300);
@@ -26,9 +26,9 @@ void red_left() {
 	robot.set_coordinates(-11.5, -62.5);
 	robot.set_original_heading(180);
 
-	// Score preload on the allaince steak.
+	// Score preload on the allaince stake.
 	robot.drive_distance(-16);
-	alliance_steak();
+	alliance_stake();
 
 	// Drive to goal and clamp it.
 	robot.drive_distance(5);
@@ -36,7 +36,7 @@ void red_left() {
 	pros::delay(100);
 	robot.drive_distance(-10, 100);
 	clamp_goal();
-	pros::delay(200);
+	pros::delay(150);
 
 	// Score ring onto the goal.
 	intake_on();
@@ -64,7 +64,7 @@ void red_left() {
 	// robot.drive_distance(-5);
 
 	// Touch the ladder for the Autonomous Win Point.
-	wall_stake.move_relative(550, 100);
+	wall_stake.move_relative(650, 100);
 	robot.drive_to_point(-24, -30);
 	robot.drive_to_point(-15, -19, 1);
 }
@@ -75,9 +75,9 @@ void blue_right() {
 	robot.set_coordinates(11.5, -62.5);
 	robot.set_original_heading(0);
 
-	// Score preload on the allaince steak.
+	// Score preload on the allaince stake.
 	robot.drive_distance(-16);
-	alliance_steak();
+	alliance_stake();
 
 	// Drive to goal and clamp it.
 	robot.drive_distance(5);
@@ -85,7 +85,7 @@ void blue_right() {
 	pros::delay(100);
 	robot.drive_distance(-10, 100);
 	clamp_goal();
-	pros::delay(200);
+	pros::delay(150);
 
 	// Score ring onto the goal.
 	intake_on();
@@ -108,7 +108,7 @@ void blue_right() {
 	pros::delay(200);
 
 	// Touch the ladder for the Autonomous Win Point.
-	wall_stake.move_relative(550, 100);
+	wall_stake.move_relative(650, 100);
 	robot.drive_to_point(24, -30);
 	robot.drive_to_point(15, -19, 1);
 }
@@ -119,9 +119,9 @@ void red_right() {
 	robot.set_coordinates(11.5, -62.5);
 	robot.set_original_heading(0);
 
-	// Score preload on the alliance steak.
+	// Score preload on the alliance stake.
 	robot.drive_distance(-16);
-	alliance_steak();
+	alliance_stake();
 
 	// Drive to goal and clamp it.
 	robot.drive_distance(5);
@@ -129,7 +129,7 @@ void red_right() {
 	pros::delay(100);
 	robot.drive_distance(-10, 100);
 	clamp_goal();
-	pros::delay(300);
+	pros::delay(150);
 
 	// Score ring onto the goal.
 	intake_on();
@@ -145,38 +145,44 @@ void red_right() {
 	// Touch the ladder for the Autonomous Win Point.
 	robot.drive_distance(-10);
 	pros::delay(200);
-	wall_stake.move_relative(550, 100);
+	wall_stake.move_relative(650, 100);
 	robot.drive_to_point(19, -20, 1);
 }
 
 void blue_left() {
 
 	// Set original pose of the robot.
-	robot.set_coordinates(-11.5, -63);
+	robot.set_coordinates(-11.5, -62.5);
 	robot.set_original_heading(180);
 
-	// Score preload on the alliance steak.
-	robot.drive_distance(-15);
-	alliance_steak();
+	// Score preload on the alliance stake.
+	robot.drive_distance(-16);
+	alliance_stake();
 
 	// Drive to goal and clamp it.
 	robot.drive_distance(5);
-	robot.drive_to_point(-16, -34, -1);
+	robot.drive_to_point(-14, -37, -1);
 	pros::delay(100);
 	robot.drive_distance(-10, 100);
 	clamp_goal();
-	pros::delay(500);
+	pros::delay(150);
 
 	// Score ring onto the goal.
 	intake_on();
-	robot.drive_to_point(-43, -28, 1);
+	robot.drive_to_point(-45, -27, 1);
 	pros::delay(500);
+
+	// Score ring in the corner
+	robot.drive_distance(-10);
+	robot.drive_to_point(-45, -40);
+	robot.set_drive_voltages(127);
+	pros::delay(700);
 
 	// Touch the ladder for the Autonomous Win Point.
 	robot.drive_distance(-10);
 	pros::delay(200);
-	intake_on(-127);
-	robot.drive_to_point(-6, -19, 1);
+	wall_stake.move_relative(650, 100);
+	robot.drive_to_point(-19, -20, 1);
 }
 
 void skills_autonomous() {
@@ -275,4 +281,5 @@ void skills_autonomous() {
 
 void drive_ten_inches() {
 	robot.drive_distance(10);
+	wall_stake.move_relative(800, 200);
 }
