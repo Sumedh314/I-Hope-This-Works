@@ -232,7 +232,7 @@ void e_stop() {
  */
 void opcontrol() {
 	while (true) {
-		printf("Dist: %d\n", distance.get_value());
+		controller.print(0, 0, "Dist: %d\n", distance.get_value());
 		pros::delay(50);
 	}
 	// pros::Task drive([](){robot.split_arcade();});
