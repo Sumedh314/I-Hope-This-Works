@@ -231,59 +231,63 @@ void e_stop() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	pros::Task drive([](){robot.split_arcade();});
-	pros::Task spin(spin_intake);
-	pros::Task wall(wall_stake_macro);
-	pros::Task toggle(toggle_clamp);
-	pros::Task vibrate_controller(dont_get_DQed);
-
-	int start = pros::millis();
-	while (pros::millis() - start < 3000) {
-		if (
-			controller.get_digital(pros::E_CONTROLLER_DIGITAL_A) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_B) ||
-			controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_X) ||
-			controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)
-		) {
-			if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
-				auton_index = 0;
-			}
-			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
-				auton_index = 1;
-			}
-			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
-				auton_index = 2;
-			}
-			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_X)) {
-				auton_index = 3;
-			}
-			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
-				auton_index = 4;
-			}
-			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
-				auton_index = 6;
-			}
-			pros::Task stop(e_stop);
-
-			drive.suspend();
-			spin.suspend();
-			toggle.suspend();
-
-			controller.print(2, 0, "Loading...");
-			inertial.reset();
-			pros::delay(2000);
-			robot.set_original_heading(90);
-
-			autonomous();
-
-			drive.resume();
-			spin.resume();
-			toggle.resume();
-
-			break;
-		}
+	while (true) {
+		printf("Dist: %d\n", distance.get_value());
 		pros::delay(50);
 	}
+	// pros::Task drive([](){robot.split_arcade();});
+	// pros::Task spin(spin_intake);
+	// pros::Task wall(wall_stake_macro);
+	// pros::Task toggle(toggle_clamp);
+	// pros::Task vibrate_controller(dont_get_DQed);
 
-	pros::Task wall_manual(wall_stake_manual);
-	pros::Task hood(move_hood_manual);
+	// int start = pros::millis();
+	// while (pros::millis() - start < 3000) {
+	// 	if (
+	// 		controller.get_digital(pros::E_CONTROLLER_DIGITAL_A) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_B) ||
+	// 		controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_X) ||
+	// 		controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)
+	// 	) {
+	// 		if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
+	// 			auton_index = 0;
+	// 		}
+	// 		else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
+	// 			auton_index = 1;
+	// 		}
+	// 		else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
+	// 			auton_index = 2;
+	// 		}
+	// 		else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_X)) {
+	// 			auton_index = 3;
+	// 		}
+	// 		else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
+	// 			auton_index = 4;
+	// 		}
+	// 		else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
+	// 			auton_index = 6;
+	// 		}
+	// 		pros::Task stop(e_stop);
+
+	// 		drive.suspend();
+	// 		spin.suspend();
+	// 		toggle.suspend();
+
+	// 		controller.print(2, 0, "Loading...");
+	// 		inertial.reset();
+	// 		pros::delay(2000);
+	// 		robot.set_original_heading(90);
+
+	// 		autonomous();
+
+	// 		drive.resume();
+	// 		spin.resume();
+	// 		toggle.resume();
+
+	// 		break;
+	// 	}
+	// 	pros::delay(50);
+	// }
+
+	// pros::Task wall_manual(wall_stake_manual);
+	// pros::Task hood(move_hood_manual);
 }

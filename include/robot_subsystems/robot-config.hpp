@@ -18,6 +18,7 @@ extern pros::IMU inertial;
 extern pros::adi::DigitalIn auton_select;
 extern pros::adi::Encoder vertical;
 extern pros::adi::Encoder horizontal;
+extern pros::adi::Ultrasonic distance;
 
 // Controller
 extern pros::Controller controller;

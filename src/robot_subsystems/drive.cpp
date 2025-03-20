@@ -1,6 +1,7 @@
 #include "main.h"
 #include "util.hpp"
 #include "robot_subsystems/drive.hpp"
+#include "robot_subsystems/robot-config.hpp"
 #include "pid.hpp"
 
 /**
@@ -72,14 +73,23 @@ void Drive::brake() {
  * when the joysticks are pushed to their physical limits.
 */
 void Drive::split_arcade() {
+    double prev_left_value = 0;
+    double slew = 10;
+
     while (true) {
         double left_value = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         double right_value = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+        
+        if (fabs(left_value - prev_left_value) > slew) {
+            left_value = prev_left_value + slew * sign(left_value - prev_left_value);
+        }
 
         double left_voltage = left_value * fabs(left_value) / 127 + right_value * fabs(right_value) / 127;
         double right_voltage = left_value * fabs(left_value) / 127 - right_value * fabs(right_value) / 127;
 
         set_drive_voltages(left_voltage, right_voltage);
+
+        prev_left_value = left_value;
         pros::delay(20);
     }
 }
@@ -510,6 +520,14 @@ void Drive::update_odometry() {
         // the next loop instead of 10. This is to make it more consistent.
         pros::Task::delay_until(&start, 10);
     }
+}
+
+/**
+ * Resets odometry using distance sensor.
+ */
+void Drive::reset_odometry() {
+    int dist = distance.get_value();
+    double perp_dist = 1 / cos(deg_to_rad(90 - get_heading()));
 }
 
 /**
