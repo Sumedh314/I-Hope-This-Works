@@ -74,7 +74,7 @@ void Drive::brake() {
 */
 void Drive::split_arcade() {
     double prev_left_value = 0;
-    double slew = 10;
+    double slew = 1000;
 
     while (true) {
         double left_value = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
@@ -526,8 +526,34 @@ void Drive::update_odometry() {
  * Resets odometry using distance sensor.
  */
 void Drive::reset_odometry() {
-    int dist = distance.get_value();
-    double perp_dist = 1 / cos(deg_to_rad(90 - get_heading()));
+    double offset = 6.17;
+
+    while (true) {
+        int dist = distance.get_value();
+        double perp_dist = 0;
+		pros::lcd::print(0, "Dist: %d\n", distance.get_value());
+        pros::delay(50);
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT)) {
+            if ((int)get_heading() % 360 < 135 && (int)get_heading() % 360 > 45) {
+                perp_dist = (dist * cos(deg_to_rad(get_heading() - 90))) / 25.4 + offset;
+                x = -72 + perp_dist;
+            }
+            else if ((int)get_heading() % 360 < 225 && (int)get_heading() % 360 > 135) {
+                perp_dist = (dist * cos(deg_to_rad(get_heading() - 180))) / 25.4 + offset;
+                y = -72 + perp_dist;
+            }
+            else if ((int)get_heading() % 360 < 315 && (int)get_heading() % 360 > 225) {
+                perp_dist = (dist * cos(deg_to_rad(get_heading() - 270))) / 25.4 + offset;
+                x = 72 - perp_dist;
+            }
+            else if ((int)get_heading() % 360 < 45 || (int)get_heading() % 360 > 315) {
+                perp_dist = (dist * cos(deg_to_rad(get_heading()))) / 25.4 + offset;
+                y = 72 - perp_dist;
+            }
+            pros::lcd::print(1, "Perp dist: %f\n", perp_dist);
+        }
+        pros::delay(50);
+    }
 }
 
 /**
