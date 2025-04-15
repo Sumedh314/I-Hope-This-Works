@@ -155,7 +155,7 @@ void autonomous() {
 	pros::Task print(print_odom);
 
 	// Move wall stake mech up a little so the hood can move.
-	wall_stake.move_relative(170, 100);
+	wall_stake.move_relative(110, 100);
 
 	// Execute the correct autonomous routine based on what was chosen in the competition_initialize() function.
 	switch (auton_index) {
@@ -245,6 +245,9 @@ void opcontrol() {
 	if (auton_happened) {
 		wall_stake.move_relative(-650, 200);
 		pros::delay(1500);
+	}
+	else {
+		wall_stake.move_relative(150, 200);
 	}
     wall_stake.set_zero_position(0);
 	pros::Task wall(wall_stake_macro);

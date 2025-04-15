@@ -17,7 +17,7 @@ void wall_stake_macro() {
             if (pros::millis() - start > 120) {
                 temp = true;
 
-                while (wall_stake.get_position() > -80) {
+                while (wall_stake.get_position() > -90) {
                     wall_stake.move(-127);
                     pros::delay(10);
                 }
@@ -45,7 +45,7 @@ void wall_stake_macro() {
             pros::delay(10);
         }
         wall_stake.brake();
-        while (hood.get_position() < 450) {
+        while (hood.get_position() < 500) {
             hood.move(127);
             pros::delay(10);
         }
