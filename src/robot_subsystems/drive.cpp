@@ -523,6 +523,33 @@ void Drive::update_odometry() {
 }
 
 /**
+ * Odometry using IMU acceleration.
+ */
+void Drive::IMU_odometry() {
+    double x_accel = 0;
+    double prev_accel = 0;
+    double velocity = 0;
+    double prev_velocity = 0;
+    double position = 0;
+
+    while (true) {
+        uint32_t start = pros::millis();
+        pros::imu_accel_s_t accel = inertial.get_accel();
+        prev_accel = x_accel;
+        prev_velocity = velocity;
+        x_accel = accel.x * 39.3700787 * 9.81 - 3.44;
+        velocity += (x_accel + prev_accel) / 2 * 0.01;
+        if (fabs(x_accel) < 0.3) {
+            velocity = 0;
+            prev_velocity = 0;
+        }
+        position += (prev_velocity + velocity) / 2 * 0.01;
+        printf("X Position: %f, X velocity: %f, X acceleration: %f\n", position, velocity, x_accel);
+        pros::Task::delay_until(&start, 10);
+    }
+}
+
+/**
  * Resets odometry using distance sensor.
  */
 void Drive::reset_odometry() {
