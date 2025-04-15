@@ -1,6 +1,7 @@
 #include "main.h"
 #include "util.hpp"
 #include "robot_subsystems/drive.hpp"
+#include "robot_subsystems/robot-config.hpp"
 #include "pid.hpp"
 
 /**
@@ -72,14 +73,23 @@ void Drive::brake() {
  * when the joysticks are pushed to their physical limits.
 */
 void Drive::split_arcade() {
+    double prev_left_value = 0;
+    double slew = 1000;
+
     while (true) {
         double left_value = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         double right_value = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+        
+        if (fabs(left_value - prev_left_value) > slew) {
+            left_value = prev_left_value + slew * sign(left_value - prev_left_value);
+        }
 
         double left_voltage = left_value * fabs(left_value) / 127 + right_value * fabs(right_value) / 127;
         double right_voltage = left_value * fabs(left_value) / 127 - right_value * fabs(right_value) / 127;
 
         set_drive_voltages(left_voltage, right_voltage);
+
+        prev_left_value = left_value;
         pros::delay(20);
     }
 }
@@ -509,6 +519,67 @@ void Drive::update_odometry() {
         // iterations. For example, if this loop took 2 milliseconds to run, it would only wait 8 milliseconds before
         // the next loop instead of 10. This is to make it more consistent.
         pros::Task::delay_until(&start, 10);
+    }
+}
+
+/**
+ * Odometry using IMU acceleration.
+ */
+void Drive::IMU_odometry() {
+    double x_accel = 0;
+    double prev_accel = 0;
+    double velocity = 0;
+    double prev_velocity = 0;
+    double position = 0;
+
+    while (true) {
+        uint32_t start = pros::millis();
+        pros::imu_accel_s_t accel = inertial.get_accel();
+        prev_accel = x_accel;
+        prev_velocity = velocity;
+        x_accel = accel.x * 39.3700787 * 9.81 - 3.44;
+        velocity += (x_accel + prev_accel) / 2 * 0.01;
+        if (fabs(x_accel) < 0.3) {
+            velocity = 0;
+            prev_velocity = 0;
+        }
+        position += (prev_velocity + velocity) / 2 * 0.01;
+        printf("X Position: %f, X velocity: %f, X acceleration: %f\n", position, velocity, x_accel);
+        pros::Task::delay_until(&start, 10);
+    }
+}
+
+/**
+ * Resets odometry using distance sensor.
+ */
+void Drive::reset_odometry() {
+    double offset = 6.17;
+
+    while (true) {
+        int dist = distance.get_value();
+        double perp_dist = 0;
+		pros::lcd::print(0, "Dist: %d\n", distance.get_value());
+        pros::delay(50);
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT)) {
+            if ((int)get_heading() % 360 < 135 && (int)get_heading() % 360 > 45) {
+                perp_dist = (dist * cos(deg_to_rad(get_heading() - 90))) / 25.4 + offset;
+                x = -72 + perp_dist;
+            }
+            else if ((int)get_heading() % 360 < 225 && (int)get_heading() % 360 > 135) {
+                perp_dist = (dist * cos(deg_to_rad(get_heading() - 180))) / 25.4 + offset;
+                y = -72 + perp_dist;
+            }
+            else if ((int)get_heading() % 360 < 315 && (int)get_heading() % 360 > 225) {
+                perp_dist = (dist * cos(deg_to_rad(get_heading() - 270))) / 25.4 + offset;
+                x = 72 - perp_dist;
+            }
+            else if ((int)get_heading() % 360 < 45 || (int)get_heading() % 360 > 315) {
+                perp_dist = (dist * cos(deg_to_rad(get_heading()))) / 25.4 + offset;
+                y = 72 - perp_dist;
+            }
+            pros::lcd::print(1, "Perp dist: %f\n", perp_dist);
+        }
+        pros::delay(50);
     }
 }
 

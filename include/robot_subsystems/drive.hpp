@@ -60,6 +60,8 @@ class Drive : public Point{
         void turn_and_drive_to_point(double target_x, double target_y, int turn_direction = 0, int drive_direction = 0, double max_drive_voltage = 127, double max_turn_voltage = 127);
         void follow_path(double path[25][2], int path_length, int forward_voltage = 127, int direction = 1);
         void update_odometry();
+        void IMU_odometry();
+        void reset_odometry();
         void set_original_heading(double original_heading);
         double get_heading();
 };

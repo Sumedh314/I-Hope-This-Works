@@ -300,4 +300,6 @@ void opcontrol() {
 
 	pros::Task wall_manual(wall_stake_manual);
 	pros::Task hood(move_hood_manual);
+	pros::Task reset_odom([](){robot.reset_odometry();});
+	pros::Task imu_odom([](){robot.IMU_odometry();});
 }
