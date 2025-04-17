@@ -79,6 +79,13 @@ void Drive::split_arcade() {
     while (true) {
         double left_value = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         double right_value = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+
+        if (fabs(left_value) < 10) {
+            left_value = 0;
+        }
+        if (fabs(right_value) < 10) {
+            right_value = 0;
+        }
         
         if (fabs(left_value - prev_left_value) > slew) {
             left_value = prev_left_value + slew * sign(left_value - prev_left_value);
@@ -527,24 +534,72 @@ void Drive::update_odometry() {
  */
 void Drive::IMU_odometry() {
     double x_accel = 0;
-    double prev_accel = 0;
-    double velocity = 0;
-    double prev_velocity = 0;
-    double position = 0;
+    double prev_x_accel = 0;
+    double x_vel = 0;
+    double prev_x_vel = 0;
+    double horizontal_distance = 0;
+    double local_x_offset = 0;
+    
+    double y_accel = 0;
+    double prev_y_accel = 0;
+    double y_vel = 0;
+    double prev_y_vel = 0;
+    double vertical_distance = 0;
+    double local_y_offset = 0;
+
+    double prev_heading = get_heading();
 
     while (true) {
         uint32_t start = pros::millis();
         pros::imu_accel_s_t accel = inertial.get_accel();
-        prev_accel = x_accel;
-        prev_velocity = velocity;
-        x_accel = accel.x * 39.3700787 * 9.81 - 3.44;
-        velocity += (x_accel + prev_accel) / 2 * 0.01;
+        
+        double current_heading = deg_to_rad(get_heading());
+        double change_in_heading = current_heading - prev_heading;
+
+        prev_x_accel = x_accel;
+        prev_x_vel = x_vel;
+        x_accel = -accel.x * 39.3700787 * 9.81 + 4.15;
+        x_vel += (x_accel + prev_x_accel) / 2 * 0.01;
         if (fabs(x_accel) < 0.3) {
-            velocity = 0;
-            prev_velocity = 0;
+            x_vel = 0;
+            prev_x_vel = 0;
         }
-        position += (prev_velocity + velocity) / 2 * 0.01;
-        printf("X Position: %f, X velocity: %f, X acceleration: %f\n", position, velocity, x_accel);
+        horizontal_distance = (prev_x_vel + x_vel) / 2 * 0.01;
+        
+        prev_y_accel = y_accel;
+        prev_y_vel = y_vel;
+        y_accel = -accel.y * 39.3700787 * 9.81 - 4.4;
+        y_vel += (y_accel + prev_y_accel) / 2 * 0.01;
+        if (fabs(front_left.get_current_draw()) < 0.3 && fabs(front_left.get_actual_velocity()) < 0.3 || fabs(y_accel) < 0.3) {
+            y_vel = 0;
+            prev_y_vel = 0;
+        }
+        vertical_distance = (prev_y_vel + y_vel) / 2 * 0.01;
+        
+        // If the robot hasn't turned, the local offset is simply the distances traveled by the tracking wheels.
+        if (fabs(change_in_heading) < 0.1) {
+            local_x_offset = horizontal_distance;
+            local_y_offset = vertical_distance;
+        }
+
+        // If the robot has turned, the local offset is calculated using an arc approximation of the robot's movement.
+        else {
+            local_x_offset = 2 * sin(change_in_heading / 2) * (horizontal_distance / change_in_heading);
+            local_y_offset = 2 * sin(change_in_heading / 2) * (vertical_distance / change_in_heading);
+        }
+
+        // Get the average heading of the robot in the previous 10 milliseconds. This is more accurate than using the
+        // current heading.
+        double average_heading = current_heading - change_in_heading / 2;
+
+        // Change x and y coordinates using the local x and y offsets.
+        x += local_y_offset * cos(average_heading) + local_x_offset * sin(average_heading);
+        y += local_y_offset * sin(average_heading) - local_x_offset * cos(average_heading);
+
+        printf("X: %f,\tX vel: %f,\t X accel: %f,\tY: %f,\tY vel: %f,\tY accel: %f %f %f\n", x, x_vel, x_accel, y, y_vel, y_accel, local_x_offset, local_y_offset);
+        // printf("X offset: %f,\tY offset: %f\n", local_x_offset, local_y_offset);
+        
+        prev_heading = current_heading;
         pros::Task::delay_until(&start, 10);
     }
 }

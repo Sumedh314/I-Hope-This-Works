@@ -287,5 +287,11 @@ void opcontrol() {
 	pros::Task wall_manual(wall_stake_manual);
 	pros::Task hood(move_hood_manual);
 	pros::Task reset_odom([](){robot.reset_odometry();});
+	robot.set_original_heading(90);
 	pros::Task imu_odom([](){robot.IMU_odometry();});
+
+	// while (true) {
+	// 	printf("vel: %d\n", front_left.get_current_draw());
+	// 	pros::delay(10);
+	// }
 }
