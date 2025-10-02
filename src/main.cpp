@@ -189,9 +189,10 @@ void autonomous() {
 */
 void print_odom() {
 	while (true) {
-        controller.print(2, 0, "(%0.2f, %0.2f)  ", robot.get_x(), robot.get_y());
+        // controller.print(2, 0, "(%0.2f, %0.2f)  ", robot.get_x(), robot.get_y());
+        controller.print(2, 0, "(%0.2f)  ", vertical.get_position() / 100);
         pros::delay(50);
-        controller.print(2, 14, "   %0.2f°  ", robot.get_heading());
+        // controller.print(2, 14, "   %0.2f°  ", robot.get_heading());
         pros::delay(50);
 	}
 }
@@ -206,7 +207,7 @@ void dont_get_DQed() {
 	while (pros::millis() - start <= 75000) {
 		pros::delay(50);
 	}
-	controller.rumble("--");
+	// controller.rumble("--");
 }
 
 /**
@@ -252,7 +253,7 @@ void opcontrol() {
     wall_stake.set_zero_position(0);
 	pros::Task wall(wall_stake_macro);
 
-	while (pros::millis() - start < 1500) {
+	while (pros::millis() - start < 2100) {
 		if (
 			controller.get_digital(pros::E_CONTROLLER_DIGITAL_A) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_B) ||
 			controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_X) ||

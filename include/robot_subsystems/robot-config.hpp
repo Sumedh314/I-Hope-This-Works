@@ -16,8 +16,8 @@ extern pros::Motor hood;
 // Sensors
 extern pros::IMU inertial;
 extern pros::adi::DigitalIn auton_select;
-extern pros::adi::Encoder vertical;
-extern pros::adi::Encoder horizontal;
+extern pros::Rotation vertical;
+extern pros::Rotation horizontal;
 extern pros::adi::Ultrasonic distance;
 
 // Controller

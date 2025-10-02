@@ -12,7 +12,7 @@ Drive::Drive(
     const double DRIVE_WHEEL_DIAMETER, const double TRACK_WIDTH, const double LEFT_OFFSET, const double HORIZONTAL_OFFSET,
     const double MOTOR_GEAR_TEETH, const double WHEEL_GEAR_TEETH, const double TRACKING_WHEEL_DIAMETER, pros::Motor& front_left,
     pros::Motor& middle_left, pros::Motor& back_left, pros::Motor& front_right, pros::Motor& middle_right, pros::Motor& back_right,
-    pros::IMU& inertial, pros::adi::Encoder& vertical, pros::adi::Encoder& horizontal, pros::Controller& controller,
+    pros::IMU& inertial, pros::Rotation& vertical, pros::Rotation& horizontal, pros::Controller& controller,
     PID drive_pid_IME, PID drive_pid, PID turn_pid
 ) :
     DRIVE_WHEEL_DIAMETER(DRIVE_WHEEL_DIAMETER),
@@ -158,14 +158,14 @@ void Drive::drive_distance_with_IME(double target, double max_voltage, double ma
 void Drive::drive_distance(double target, double max_voltage) {
 
     // Get the original position of the encoder in degrees.
-    double original_position = vertical.get_value();
+    double original_position = vertical.get_position() / 100;
 
     // Keep going until the robot if settled, either by reaching the desired distance or by getting stuck for too long.
     while (!drive_pid.is_settled()) {
 
         // Get the current error in inches and feed it into the PID controller. Looks at the difference in the current
         // position and the original position and converts that to inches.
-        double current_position = (vertical.get_value() - original_position) * TRACKING_WHEEL_DIAMETER * pi / 360;
+        double current_position = (vertical.get_position() / 100 - original_position) * TRACKING_WHEEL_DIAMETER * pi / 360;
         double error = target - current_position;
         double voltage = drive_pid.compute(error);
 
@@ -484,21 +484,24 @@ void Drive::update_odometry() {
     double local_x_offset = 0;
     double local_y_offset = 0;
 
+    vertical.set_position(0);
+    horizontal.set_position(0);
+
     while (true) {
 
         // The time at which this iteration of the loop started.
         std::uint32_t start = pros::millis();
 
         // Find out how the robot changed from the previous loop.
-        double current_vertical = vertical.get_value();
+        double current_vertical = vertical.get_position() / 100;
         double vertical_distance = (current_vertical - prev_vertical) * TRACKING_WHEEL_DIAMETER * pi / 360;
-        double current_horizontal = horizontal.get_value();
+        double current_horizontal = horizontal.get_position() / 100;
         double horizontal_distance = (current_horizontal - prev_horizontal) * TRACKING_WHEEL_DIAMETER * pi / 360;
         double current_heading = deg_to_rad(get_heading());
         double change_in_heading = current_heading - prev_heading;
 
         // If the robot hasn't turned, the local offset is simply the distances traveled by the tracking wheels.
-        if (change_in_heading == 0) {
+        if (fabs(change_in_heading) < 0.0001) {
             local_x_offset = horizontal_distance;
             local_y_offset = vertical_distance;
         }
@@ -533,6 +536,7 @@ void Drive::update_odometry() {
  * Odometry using IMU acceleration.
  */
 void Drive::IMU_odometry() {
+    double x_jerk = 0;
     double x_accel = 0;
     double prev_x_accel = 0;
     double x_vel = 0;
@@ -549,6 +553,10 @@ void Drive::IMU_odometry() {
 
     double prev_heading = get_heading();
 
+    double x_accels[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    double y_accels[10] = {0, 0, 0, 0, 0};
+    double sum = 0;
+
     while (true) {
         uint32_t start = pros::millis();
         pros::imu_accel_s_t accel = inertial.get_accel();
@@ -556,28 +564,39 @@ void Drive::IMU_odometry() {
         double current_heading = deg_to_rad(get_heading());
         double change_in_heading = current_heading - prev_heading;
 
-        prev_x_accel = x_accel;
-        prev_x_vel = x_vel;
-        x_accel = -accel.x * 39.3700787 * 9.81 + 4.15;
-        x_vel += (x_accel + prev_x_accel) / 2 * 0.01;
-        if (fabs(x_accel) < 0.3) {
+        
+        for (int i = 0; i < 20; i++) {
+            x_accels[i] = x_accels[i + 1];
+            sum += x_accels[i];
+        }
+        x_accels[9] = x_accel;
+        sum += x_accel;
+        
+        x_accel = sum / 20;
+        sum = 0;
+        x_accel = -(accel.x - sin(deg_to_rad(inertial.get_pitch()))) * 39.3700787 * 9.81;
+        
+        x_vel += (x_accel + prev_x_accel) / 2 * 0.02;
+        x_jerk = (x_accel - prev_x_accel);
+        if (fabs(x_accel) < 0.2 && fabs(x_jerk) < 0.2) {
             x_vel = 0;
             prev_x_vel = 0;
         }
-        horizontal_distance = (prev_x_vel + x_vel) / 2 * 0.01;
+        horizontal_distance = (prev_x_vel + x_vel) / 2 * 0.02;
         
         prev_y_accel = y_accel;
         prev_y_vel = y_vel;
-        y_accel = -accel.y * 39.3700787 * 9.81 - 4.4;
+        y_accel = -accel.y * 39.3700787 * 9.81;
+        y_accel = (accel.y - sin(deg_to_rad(inertial.get_roll()))) * 39.3700787 * 9.81;
         y_vel += (y_accel + prev_y_accel) / 2 * 0.01;
         if (fabs(front_left.get_current_draw()) < 0.3 && fabs(front_left.get_actual_velocity()) < 0.3 || fabs(y_accel) < 0.3) {
             y_vel = 0;
             prev_y_vel = 0;
         }
-        vertical_distance = (prev_y_vel + y_vel) / 2 * 0.01;
+        vertical_distance = (prev_y_vel + y_vel) / 2 * 0.02;
         
         // If the robot hasn't turned, the local offset is simply the distances traveled by the tracking wheels.
-        if (fabs(change_in_heading) < 0.1) {
+        if (fabs(change_in_heading) < 0.0001) {
             local_x_offset = horizontal_distance;
             local_y_offset = vertical_distance;
         }
@@ -596,11 +615,14 @@ void Drive::IMU_odometry() {
         x += local_y_offset * cos(average_heading) + local_x_offset * sin(average_heading);
         y += local_y_offset * sin(average_heading) - local_x_offset * cos(average_heading);
 
-        printf("X: %f,\tX vel: %f,\t X accel: %f,\tY: %f,\tY vel: %f,\tY accel: %f %f %f\n", x, x_vel, x_accel, y, y_vel, y_accel, local_x_offset, local_y_offset);
+        printf("X: %f,\tX vel: %f,\t X accel: %f,\tY: %f,\tY vel: %f,\tY accel: %f,\tHeading: %f,\tX jerk: %f\n", x, x_vel, x_accel, y, y_vel, y_accel, change_in_heading, x_jerk);
         // printf("X offset: %f,\tY offset: %f\n", local_x_offset, local_y_offset);
         
         prev_heading = current_heading;
-        pros::Task::delay_until(&start, 10);
+
+        prev_x_accel = x_accel;
+        prev_x_vel = x_vel;
+        pros::Task::delay_until(&start, 20);
     }
 }
 
