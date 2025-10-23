@@ -66,7 +66,6 @@ void red_left() {
 	// robot.drive_distance(-5);
 
 	// Touch the ladder for the Autonomous Win Point.
-	wall_stake.move_relative(650, 100);
 	robot.drive_to_point(-24, -30);
 	robot.drive_to_point(-15, -19, 1);
 }
@@ -110,8 +109,7 @@ void blue_right() {
 	pros::delay(200);
 
 	// Touch the ladder for the Autonomous Win Point.
-	wall_stake.move_relative(650, 100);
-	robot.drive_to_point(24, -30);
+ 	robot.drive_to_point(24, -30);
 	robot.drive_to_point(15, -19, 1);
 }
 
@@ -153,8 +151,7 @@ void red_right() {
 	// Touch the ladder for the Autonomous Win Point.
 	robot.drive_distance(-10);
 	pros::delay(200);
-	wall_stake.move_relative(650, 100);
-	robot.drive_to_point(19, -20, 1);
+ 	robot.drive_to_point(19, -20, 1);
 }
 
 void blue_left() {
@@ -191,8 +188,7 @@ void blue_left() {
 	// Touch the ladder for the Autonomous Win Point.
 	robot.drive_distance(-10);
 	pros::delay(200);
-	wall_stake.move_relative(650, 100);
-	robot.drive_to_point(-19, -20, 1);
+ 	robot.drive_to_point(-19, -20, 1);
 }
 
 void skills_autonomous() {
@@ -287,8 +283,7 @@ void skills_autonomous() {
 	robot.drive_distance(-10);
 	unclamp_goal();
 	intake_off();
-	wall_stake.move_relative(-70, 200);
-	robot.turn_and_drive_to_point(-12, 60);
+ 	robot.turn_and_drive_to_point(-12, 60);
 	robot.turn_to_point(-72, -72);
 	robot.drive_to_point(-60, 60);
 	robot.drive_distance(-10);
@@ -300,5 +295,4 @@ void skills_autonomous() {
 
 void drive_ten_inches() {
 	robot.drive_distance(10);
-	wall_stake.move_relative(800, 200);
 }

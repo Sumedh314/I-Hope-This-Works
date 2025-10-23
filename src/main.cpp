@@ -2,7 +2,6 @@
 #include "robot_subsystems/robot-config.hpp"
 #include "robot_subsystems/drive.hpp"
 #include "robot_subsystems/intake.hpp"
-#include "robot_subsystems/wall_stake.hpp"
 #include "robot_subsystems/pneumatics.hpp"
 #include "util.hpp"
 #include "autons.hpp"
@@ -59,8 +58,6 @@ void initialize() {
 
 	intake.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 
-	wall_stake.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-	hood.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 }
 
 /**
@@ -155,7 +152,6 @@ void autonomous() {
 	pros::Task print(print_odom);
 
 	// Move wall stake mech up a little so the hood can move.
-	wall_stake.move_relative(110, 100);
 
 	// Execute the correct autonomous routine based on what was chosen in the competition_initialize() function.
 	switch (auton_index) {
@@ -243,16 +239,6 @@ void opcontrol() {
 
 	int start = pros::millis();
 
-	if (auton_happened) {
-		wall_stake.move_relative(-650, 200);
-		pros::delay(1500);
-	}
-	else {
-		wall_stake.move_relative(150, 200);
-	}
-    wall_stake.set_zero_position(0);
-	pros::Task wall(wall_stake_macro);
-
 	while (pros::millis() - start < 2100) {
 		if (
 			controller.get_digital(pros::E_CONTROLLER_DIGITAL_A) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_B) ||
@@ -299,11 +285,8 @@ void opcontrol() {
 		pros::delay(50);
 	}
 
-	pros::Task wall_manual(wall_stake_manual);
-	pros::Task hood(move_hood_manual);
 	pros::Task reset_odom([](){robot.reset_odometry();});
 	robot.set_original_heading(90);
-	pros::Task imu_odom([](){robot.IMU_odometry();});
 
 	// while (true) {
 	// 	printf("vel: %d\n", front_left.get_current_draw());

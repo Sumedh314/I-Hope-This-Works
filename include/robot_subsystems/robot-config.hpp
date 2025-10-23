@@ -14,8 +14,6 @@ extern pros::Motor redirect;
 
 
 
-extern pros::Motor wall_stake;
-extern pros::Motor hood;
 
 // Sensors
 extern pros::IMU inertial;

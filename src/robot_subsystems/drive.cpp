@@ -535,96 +535,96 @@ void Drive::update_odometry() {
 /**
  * Odometry using IMU acceleration.
  */
-void Drive::IMU_odometry() {
-    double x_jerk = 0;
-    double x_accel = 0;
-    double prev_x_accel = 0;
-    double x_vel = 0;
-    double prev_x_vel = 0;
-    double horizontal_distance = 0;
-    double local_x_offset = 0;
+// void Drive::IMU_odometry() {
+//     double x_jerk = 0;
+//     double x_accel = 0;
+//     double prev_x_accel = 0;
+//     double x_vel = 0;
+//     double prev_x_vel = 0;
+//     double horizontal_distance = 0;
+//     double local_x_offset = 0;
     
-    double y_accel = 0;
-    double prev_y_accel = 0;
-    double y_vel = 0;
-    double prev_y_vel = 0;
-    double vertical_distance = 0;
-    double local_y_offset = 0;
+//     double y_accel = 0;
+//     double prev_y_accel = 0;
+//     double y_vel = 0;
+//     double prev_y_vel = 0;
+//     double vertical_distance = 0;
+//     double local_y_offset = 0;
 
-    double prev_heading = get_heading();
+//     double prev_heading = get_heading();
 
-    double x_accels[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    double y_accels[10] = {0, 0, 0, 0, 0};
-    double sum = 0;
+//     double x_accels[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+//     double y_accels[10] = {0, 0, 0, 0, 0};
+//     double sum = 0;
 
-    while (true) {
-        uint32_t start = pros::millis();
-        pros::imu_accel_s_t accel = inertial.get_accel();
+//     while (true) {
+//         uint32_t start = pros::millis();
+//         pros::imu_accel_s_t accel = inertial.get_accel();
         
-        double current_heading = deg_to_rad(get_heading());
-        double change_in_heading = current_heading - prev_heading;
+//         double current_heading = deg_to_rad(get_heading());
+//         double change_in_heading = current_heading - prev_heading;
 
         
-        for (int i = 0; i < 20; i++) {
-            x_accels[i] = x_accels[i + 1];
-            sum += x_accels[i];
-        }
-        x_accels[9] = x_accel;
-        sum += x_accel;
+//         for (int i = 0; i < 20; i++) {
+//             x_accels[i] = x_accels[i + 1];
+//             sum += x_accels[i];
+//         }
+//         x_accels[9] = x_accel;
+//         sum += x_accel;
         
-        x_accel = sum / 20;
-        sum = 0;
-        x_accel = -(accel.x - sin(deg_to_rad(inertial.get_pitch()))) * 39.3700787 * 9.81;
+//         x_accel = sum / 20;
+//         sum = 0;
+//         x_accel = -(accel.x - sin(deg_to_rad(inertial.get_pitch()))) * 39.3700787 * 9.81;
         
-        x_vel += (x_accel + prev_x_accel) / 2 * 0.02;
-        x_jerk = (x_accel - prev_x_accel);
-        if (fabs(x_accel) < 0.2 && fabs(x_jerk) < 0.2) {
-            x_vel = 0;
-            prev_x_vel = 0;
-        }
-        horizontal_distance = (prev_x_vel + x_vel) / 2 * 0.02;
+//         x_vel += (x_accel + prev_x_accel) / 2 * 0.02;
+//         x_jerk = (x_accel - prev_x_accel);
+//         if (fabs(x_accel) < 0.2 && fabs(x_jerk) < 0.2) {
+//             x_vel = 0;
+//             prev_x_vel = 0;
+//         }
+//         horizontal_distance = (prev_x_vel + x_vel) / 2 * 0.02;
         
-        prev_y_accel = y_accel;
-        prev_y_vel = y_vel;
-        y_accel = -accel.y * 39.3700787 * 9.81;
-        y_accel = (accel.y - sin(deg_to_rad(inertial.get_roll()))) * 39.3700787 * 9.81;
-        y_vel += (y_accel + prev_y_accel) / 2 * 0.01;
-        if (fabs(front_left.get_current_draw()) < 0.3 && fabs(front_left.get_actual_velocity()) < 0.3 || fabs(y_accel) < 0.3) {
-            y_vel = 0;
-            prev_y_vel = 0;
-        }
-        vertical_distance = (prev_y_vel + y_vel) / 2 * 0.02;
+//         prev_y_accel = y_accel;
+//         prev_y_vel = y_vel;
+//         y_accel = -accel.y * 39.3700787 * 9.81;
+//         y_accel = (accel.y - sin(deg_to_rad(inertial.get_roll()))) * 39.3700787 * 9.81;
+//         y_vel += (y_accel + prev_y_accel) / 2 * 0.01;
+//         if (fabs(front_left.get_current_draw()) < 0.3 && fabs(front_left.get_actual_velocity()) < 0.3 || fabs(y_accel) < 0.3) {
+//             y_vel = 0;
+//             prev_y_vel = 0;
+//         }
+//         vertical_distance = (prev_y_vel + y_vel) / 2 * 0.02;
         
-        // If the robot hasn't turned, the local offset is simply the distances traveled by the tracking wheels.
-        if (fabs(change_in_heading) < 0.0001) {
-            local_x_offset = horizontal_distance;
-            local_y_offset = vertical_distance;
-        }
+//         // If the robot hasn't turned, the local offset is simply the distances traveled by the tracking wheels.
+//         if (fabs(change_in_heading) < 0.0001) {
+//             local_x_offset = horizontal_distance;
+//             local_y_offset = vertical_distance;
+//         }
 
-        // If the robot has turned, the local offset is calculated using an arc approximation of the robot's movement.
-        else {
-            local_x_offset = 2 * sin(change_in_heading / 2) * (horizontal_distance / change_in_heading);
-            local_y_offset = 2 * sin(change_in_heading / 2) * (vertical_distance / change_in_heading);
-        }
+//         // If the robot has turned, the local offset is calculated using an arc approximation of the robot's movement.
+//         else {
+//             local_x_offset = 2 * sin(change_in_heading / 2) * (horizontal_distance / change_in_heading);
+//             local_y_offset = 2 * sin(change_in_heading / 2) * (vertical_distance / change_in_heading);
+//         }
 
-        // Get the average heading of the robot in the previous 10 milliseconds. This is more accurate than using the
-        // current heading.
-        double average_heading = current_heading - change_in_heading / 2;
+//         // Get the average heading of the robot in the previous 10 milliseconds. This is more accurate than using the
+//         // current heading.
+//         double average_heading = current_heading - change_in_heading / 2;
 
-        // Change x and y coordinates using the local x and y offsets.
-        x += local_y_offset * cos(average_heading) + local_x_offset * sin(average_heading);
-        y += local_y_offset * sin(average_heading) - local_x_offset * cos(average_heading);
+//         // Change x and y coordinates using the local x and y offsets.
+//         x += local_y_offset * cos(average_heading) + local_x_offset * sin(average_heading);
+//         y += local_y_offset * sin(average_heading) - local_x_offset * cos(average_heading);
 
-        printf("X: %f,\tX vel: %f,\t X accel: %f,\tY: %f,\tY vel: %f,\tY accel: %f,\tHeading: %f,\tX jerk: %f\n", x, x_vel, x_accel, y, y_vel, y_accel, change_in_heading, x_jerk);
-        // printf("X offset: %f,\tY offset: %f\n", local_x_offset, local_y_offset);
+//         printf("X: %f,\tX vel: %f,\t X accel: %f,\tY: %f,\tY vel: %f,\tY accel: %f,\tHeading: %f,\tX jerk: %f\n", x, x_vel, x_accel, y, y_vel, y_accel, change_in_heading, x_jerk);
+//         // printf("X offset: %f,\tY offset: %f\n", local_x_offset, local_y_offset);
         
-        prev_heading = current_heading;
+//         prev_heading = current_heading;
 
-        prev_x_accel = x_accel;
-        prev_x_vel = x_vel;
-        pros::Task::delay_until(&start, 20);
-    }
-}
+//         prev_x_accel = x_accel;
+//         prev_x_vel = x_vel;
+//         pros::Task::delay_until(&start, 20);
+//     }
+// }
 
 /**
  * Resets odometry using distance sensor.
