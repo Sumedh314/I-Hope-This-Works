@@ -25,4 +25,4 @@ pros::adi::Ultrasonic distance(7, 8);
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
 // Pneumatics
-pros::adi::DigitalOut goal_clamp(100);
+pros::adi::DigitalOut match_loader(8);

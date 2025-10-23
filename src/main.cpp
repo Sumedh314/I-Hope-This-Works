@@ -234,7 +234,7 @@ void e_stop() {
 void opcontrol() {
 	pros::Task drive([](){robot.split_arcade();});
 	pros::Task spin(spin_intake);
-	pros::Task toggle(toggle_clamp);
+	pros::Task toggle(toggle_loader);
 	pros::Task vibrate_controller(dont_get_DQed);
 
 	int start = pros::millis();

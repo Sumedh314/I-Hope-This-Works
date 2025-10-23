@@ -1,5 +1,5 @@
 #include "main.h"
 
-void toggle_clamp();
-void clamp_goal();
-void unclamp_goal();
+void toggle_loader();
+void deploy_loader();
+void undeploy_loader();

@@ -37,7 +37,7 @@ void red_left() {
 	robot.drive_to_point(-14, -37, -1);
 	pros::delay(100);
 	robot.drive_distance(-10, 100);
-	clamp_goal();
+	deploy_loader();
 	pros::delay(150);
 
 	// Score ring onto the goal.
@@ -85,7 +85,7 @@ void blue_right() {
 	robot.drive_to_point(14, -37, -1);
 	pros::delay(100);
 	robot.drive_distance(-10, 100);
-	clamp_goal();
+	deploy_loader();
 	pros::delay(150);
 
 	// Score ring onto the goal.
@@ -128,7 +128,7 @@ void red_right() {
 	robot.drive_to_point(14, -37, -1);
 	pros::delay(100);
 	robot.drive_distance(-10, 100);
-	clamp_goal();
+	deploy_loader();
 	pros::delay(150);
 
 	// Score ring onto the goal.
@@ -169,7 +169,7 @@ void blue_left() {
 	robot.drive_to_point(-14, -37, -1);
 	pros::delay(100);
 	robot.drive_distance(-10, 100);
-	clamp_goal();
+	deploy_loader();
 	pros::delay(150);
 
 	// Score ring onto the goal.
@@ -214,7 +214,7 @@ void skills_autonomous() {
 	pros::delay(200);
 	robot.drive_distance(-10, 100);
 	pros::delay(200);
-	clamp_goal();
+	deploy_loader();
 	pros::delay(500);
 
 	// Start intake and attempt to pick up another ring.
@@ -243,7 +243,7 @@ void skills_autonomous() {
 
 	// Put goal in the corner
 	robot.turn_to_point(60, -60, -1);
-	unclamp_goal();
+	undeploy_loader();
 	robot.drive_distance(-11);
 	intake_off();
 
@@ -253,7 +253,7 @@ void skills_autonomous() {
 	pros::delay(200);
 	robot.drive_distance(-10, 100);
 	pros::delay(200);
-	clamp_goal();
+	deploy_loader();
 	pros::delay(500);
 
 	// Score ring in front of the goal.
@@ -281,7 +281,7 @@ void skills_autonomous() {
 	// Put goal in the corner.
 	robot.turn_to_point(-60, -60, -1);
 	robot.drive_distance(-10);
-	unclamp_goal();
+	undeploy_loader();
 	intake_off();
  	robot.turn_and_drive_to_point(-12, 60);
 	robot.turn_to_point(-72, -72);

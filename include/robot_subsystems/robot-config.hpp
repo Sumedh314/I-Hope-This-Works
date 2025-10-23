@@ -28,4 +28,4 @@ extern pros::adi::Ultrasonic distance;
 extern pros::Controller controller;
 
 // Pneumatics
-extern pros::adi::DigitalOut goal_clamp;
+extern pros::adi::DigitalOut match_loader;
