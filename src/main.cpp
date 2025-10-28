@@ -57,7 +57,8 @@ void initialize() {
 	back_right.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
 
 	intake.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-
+	hopper.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	redirect.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 }
 
 /**
@@ -186,7 +187,7 @@ void autonomous() {
 void print_odom() {
 	while (true) {
         // controller.print(2, 0, "(%0.2f, %0.2f)  ", robot.get_x(), robot.get_y());
-        controller.print(2, 0, "(%0.2f)  ", vertical.get_position() / 100);
+        pros::lcd::print(0, "(%i)  ", vertical.get_position() / 100);
         pros::delay(50);
         // controller.print(2, 14, "   %0.2f°  ", robot.get_heading());
         pros::delay(50);
@@ -239,7 +240,7 @@ void opcontrol() {
 
 	int start = pros::millis();
 
-	while (pros::millis() - start < 2100) {
+	while (pros::millis() - start < 3000) {
 		if (
 			controller.get_digital(pros::E_CONTROLLER_DIGITAL_A) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_B) ||
 			controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_X) ||
@@ -271,7 +272,7 @@ void opcontrol() {
 
 			controller.print(2, 0, "Loading...");
 			inertial.reset();
-			pros::delay(2100);
+			pros::delay(2000);
 			robot.set_original_heading(90);
 
 			autonomous();
@@ -285,11 +286,11 @@ void opcontrol() {
 		pros::delay(50);
 	}
 
-	pros::Task reset_odom([](){robot.reset_odometry();});
+	// pros::Task reset_odom([](){robot.reset_odometry();});
 	robot.set_original_heading(90);
 
-	// while (true) {
-	// 	printf("vel: %d\n", front_left.get_current_draw());
-	// 	pros::delay(10);
-	// }
+	// // while (true) {
+	// // 	printf("vel: %d\n", front_left.get_current_draw());
+	// // 	pros::delay(10);
+	// // }
 }
