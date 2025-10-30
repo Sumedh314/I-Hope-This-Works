@@ -45,7 +45,7 @@ class Drive : public Point{
             const double DRIVE_WHEEL_DIAMETER, const double TRACK_WIDTH, const double LEFT_OFFSET, const double HORIZONTAL_OFFSET,
             const double MOTOR_GEAR_TEETH, const double WHEEL_GEAR_TEETH, const double TRACKING_WHEEL_DIAMETER, pros::Motor& front_left,
             pros::Motor& middle_left, pros::Motor& back_left, pros::Motor& front_right, pros::Motor& middle_right, pros::Motor& back_right,
-            pros::IMU& imu, pros::Rotation& vertical, pros::Rotation& horizontal, pros::Controller& controller, PID drive_pid_IME,
+            pros::IMU& inertial, pros::Rotation& vertical, pros::Rotation& horizontal, pros::Controller& controller, PID drive_pid_IME,
             PID drive_pid, PID turn_pid
         );
         void set_drive_voltages(double left_voltage, double right_voltage);

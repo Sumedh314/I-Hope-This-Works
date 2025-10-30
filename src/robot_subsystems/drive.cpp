@@ -493,7 +493,7 @@ void Drive::update_odometry() {
         std::uint32_t start = pros::millis();
 
         // Find out how the robot changed from the previous loop.
-        double current_vertical = vertical.get_position() / 100;
+        double current_vertical = -vertical.get_position() / 100;
         double vertical_distance = (current_vertical - prev_vertical) * TRACKING_WHEEL_DIAMETER * pi / 360;
         double current_horizontal = horizontal.get_position() / 100;
         double horizontal_distance = (current_horizontal - prev_horizontal) * TRACKING_WHEEL_DIAMETER * pi / 360;

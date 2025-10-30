@@ -40,9 +40,15 @@ void spin_intake() {
 }
 
 void intake_on(double voltage) {
-	intake.move(voltage);
+	while (true){
+		intake.move(voltage);
+		hopper.move(voltage);
+	}
+
 }
 
 void intake_off() {
 	intake.brake();
+	hopper.brake();
+	redirect.brake();
 }
