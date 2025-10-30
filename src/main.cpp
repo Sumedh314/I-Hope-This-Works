@@ -151,6 +151,7 @@ void autonomous() {
 	// Start odometry tasks.
 	pros::Task odom([](){robot.update_odometry();});
 	pros::Task print(print_odom);
+	pros::delay(100);
 
 	// Move wall stake mech up a little so the hood can move.
 
@@ -186,11 +187,12 @@ void autonomous() {
 */
 void print_odom() {
 	while (true) {
-        // controller.print(2, 0, "(%0.2f, %0.2f)  ", robot.get_x(), robot.get_y());
+        controller.print(2, 0, "(%0.2f, %0.2f)  ", robot.get_x(), robot.get_y());
         pros::lcd::print(0, "(%i)  ", vertical.get_position() / 100);
         pros::delay(50);
-        // controller.print(2, 14, "   %0.2f°  ", robot.get_heading());
+        controller.print(2, 14, "   %0.2f°  ", robot.get_heading());
         pros::delay(50);
+		printf("Hopper: %d\n", hopper.get_voltage());
 	}
 }
 

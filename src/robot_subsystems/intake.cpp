@@ -31,6 +31,10 @@ void spin_intake() {
 		}
 
 		else {
+			intake.move(0);
+			redirect.move(0);
+			hopper.move(0);
+
 			intake.brake();
 			redirect.brake();
 			hopper.brake();

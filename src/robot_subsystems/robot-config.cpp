@@ -17,8 +17,8 @@ pros::Motor redirect(18, pros::v5::MotorGearset::blue, pros::v5::MotorEncoderUni
 // Sensors
 pros::IMU inertial(20);
 pros::adi::DigitalIn auton_select(2);
-pros::Rotation vertical(-13);
-pros::Rotation horizontal(15);
+pros::Rotation vertical(12);
+pros::Rotation horizontal(11);
 pros::adi::Ultrasonic distance(7, 8);
 
 // Controller

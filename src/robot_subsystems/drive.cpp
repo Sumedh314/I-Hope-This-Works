@@ -158,14 +158,14 @@ void Drive::drive_distance_with_IME(double target, double max_voltage, double ma
 void Drive::drive_distance(double target, double max_voltage) {
 
     // Get the original position of the encoder in degrees.
-    double original_position = vertical.get_position() / 100;
+    double original_position = -vertical.get_position() / 100;
 
     // Keep going until the robot if settled, either by reaching the desired distance or by getting stuck for too long.
     while (!drive_pid.is_settled()) {
 
         // Get the current error in inches and feed it into the PID controller. Looks at the difference in the current
         // position and the original position and converts that to inches.
-        double current_position = (vertical.get_position() / 100 - original_position) * TRACKING_WHEEL_DIAMETER * pi / 360;
+        double current_position = (-vertical.get_position() / 100 - original_position) * TRACKING_WHEEL_DIAMETER * pi / 360;
         double error = target - current_position;
         double voltage = drive_pid.compute(error);
 
@@ -175,7 +175,7 @@ void Drive::drive_distance(double target, double max_voltage) {
 
         // Output voltages and delay for next loop.
         set_drive_voltages(voltage);
-        pros::delay(10);
+        pros::delay(100);
     }
 
     // Make sure robot doesn't continue moving.
@@ -493,7 +493,7 @@ void Drive::update_odometry() {
         std::uint32_t start = pros::millis();
 
         // Find out how the robot changed from the previous loop.
-        double current_vertical = vertical.get_position() / 100;
+        double current_vertical = -vertical.get_position() / 100;
         double vertical_distance = (current_vertical - prev_vertical) * TRACKING_WHEEL_DIAMETER * pi / 360;
         double current_horizontal = horizontal.get_position() / 100;
         double horizontal_distance = (current_horizontal - prev_horizontal) * TRACKING_WHEEL_DIAMETER * pi / 360;
@@ -535,7 +535,7 @@ void Drive::update_odometry() {
 /**
  * Odometry using IMU acceleration.
  */
-// void Drive::IMU_odometry() {
+void Drive::IMU_odometry() {
 //     double x_jerk = 0;
 //     double x_accel = 0;
 //     double prev_x_accel = 0;
@@ -624,7 +624,7 @@ void Drive::update_odometry() {
 //         prev_x_vel = x_vel;
 //         pros::Task::delay_until(&start, 20);
 //     }
-// }
+}
 
 /**
  * Resets odometry using distance sensor.
