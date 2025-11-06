@@ -19,7 +19,11 @@ pros::IMU inertial(20);
 pros::adi::DigitalIn auton_select(2);
 pros::Rotation vertical(12);
 pros::Rotation horizontal(11);
+<<<<<<< HEAD
 pros::adi::Ultrasonic distance(7, 8);
+=======
+// pros::adi::Ultrasonic distance(7, 8);
+>>>>>>> 2d648702d6b4fa138a9758c030fb603fd77a9afb
 
 // Controller
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
