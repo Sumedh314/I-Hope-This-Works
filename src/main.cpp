@@ -187,11 +187,11 @@ void autonomous() {
 */
 void print_odom() {
 	while (true) {
-<<<<<<< HEAD
+// <<<<<<< HEAD
         controller.print(2, 0, "(%0.2f, %0.2f)  ", robot.get_x(), robot.get_y());
         pros::lcd::print(0, "(%i)  ", vertical.get_position() / 100);
         pros::delay(50);
-=======
+// =======
 		printf("%f", vertical.get_position());
 		pros::delay(50);
 
@@ -201,7 +201,7 @@ void print_odom() {
         pros::delay(50);
         pros::lcd::print(1, "%d  ", vertical.get_position());
         pros::delay(50);
->>>>>>> 2d648702d6b4fa138a9758c030fb603fd77a9afb
+// >>>>>>> 2d648702d6b4fa138a9758c030fb603fd77a9afb
         controller.print(2, 14, "   %0.2f°  ", robot.get_heading());
         pros::delay(50);
 		printf("Hopper: %d\n", hopper.get_voltage());

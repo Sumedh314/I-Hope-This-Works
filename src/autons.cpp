@@ -64,38 +64,40 @@ void red_right() {
 	robot.set_coordinates(11.5, -62.5);
 	robot.set_original_heading(0);
 
-	// Score preload on the alliance stake.
-	robot.drive_distance(-16);
+	robot.drive_distance_with_IME(10);
 
-	// Drive to goal and clamp it.
-	robot.drive_distance(5);
-	robot.drive_to_point(14, -37, -1);
-	pros::delay(100);
-	robot.drive_distance(-10, 100);
-	deploy_loader();
-	pros::delay(150);
+	// // Score preload on the alliance stake.
+	// robot.drive_distance(-16);
 
-	// Score ring onto the goal.
-	intake_on();
-	robot.drive_to_point(45, -27, 1);
-	pros::delay(1000);
-	intake_off();
-	// while (robot.get_heading() > -60) {
-	// 	robot.set_drive_voltages(127, 0);
-	// }
-	// robot.brake();
+	// // Drive to goal and clamp it.
+	// robot.drive_distance(5);
+	// robot.drive_to_point(14, -37, -1);
+	// pros::delay(100);
+	// robot.drive_distance(-10, 100);
+	// deploy_loader();
+	// pros::delay(150);
 
-	// Score ring in the corner
+	// // Score ring onto the goal.
+	// intake_on();
+	// robot.drive_to_point(45, -27, 1);
+	// pros::delay(1000);
+	// intake_off();
+	// // while (robot.get_heading() > -60) {
+	// // 	robot.set_drive_voltages(127, 0);
+	// // }
+	// // robot.brake();
+
+	// // Score ring in the corner
+	// // robot.drive_distance(-10);
+	// robot.drive_to_point(50, -40);
+	// intake_on();
+	// robot.set_drive_voltages(127);
+	// pros::delay(1200);
+
+	// // Touch the ladder for the Autonomous Win Point.
 	// robot.drive_distance(-10);
-	robot.drive_to_point(50, -40);
-	intake_on();
-	robot.set_drive_voltages(127);
-	pros::delay(1200);
-
-	// Touch the ladder for the Autonomous Win Point.
-	robot.drive_distance(-10);
-	pros::delay(200);
- 	robot.drive_to_point(19, -20, 1);
+	// pros::delay(200);
+ 	// robot.drive_to_point(19, -20, 1);
 }
 
 void blue_left() {
@@ -104,11 +106,11 @@ void blue_left() {
 	// Set original pose of the robot.
 
 	//y, x
-	robot.set_coordinates(-24, -48);
+	robot.set_coordinates(-24, -72);
 	robot.set_original_heading(90);
 
-<<<<<<< HEAD
-	robot.drive_distance(20);
+// <<<<<<< HEAD
+	robot.drive_to_point(-24, -24);
 
 	// // Score preload on the alliance stake.
 	// robot.drive_distance(-16);
@@ -139,14 +141,14 @@ void blue_left() {
 	// robot.drive_distance(-10);
 	// pros::delay(200);
  	// robot.drive_to_point(-19, -20, 1);
-=======
+// =======
 	// Score preload on the alliance stake.
-	robot.drive_to_point(-24,-40);
-	pros::delay(100);
-	intake_on();
-	pros::delay(200);
-	intake_off();
->>>>>>> 2d648702d6b4fa138a9758c030fb603fd77a9afb
+	// robot.drive_to_point(-24,-40);
+	// pros::delay(100);
+	// intake_on();
+	// pros::delay(200);
+	// intake_off();
+// >>>>>>> 2d648702d6b4fa138a9758c030fb603fd77a9afb
 }
 
 void skills_autonomous() {
