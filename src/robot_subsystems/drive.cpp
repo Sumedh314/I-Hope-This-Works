@@ -239,6 +239,7 @@ void Drive::drive_to_point(double target_x, double target_y, int direction, doub
 
         // Move the robot and delay for next loop.
         set_drive_voltages(drive_voltage - turn_voltage, drive_voltage + turn_voltage);
+        printf("Error: %f\n", lateral_error);
         pros::delay(10);
     }
     turn_pid.compute(100);

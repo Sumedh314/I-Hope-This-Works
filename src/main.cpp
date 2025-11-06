@@ -8,10 +8,10 @@
 
 // Create PID and drivetrain objects used for the rest of the code.
 PID drive_pid_IME(20.5, 0, 1.7, 10, 1, 1);
-PID drive_pid(10, 0, 0.2, 5, 3, 3);
+PID drive_pid(7, 0, 0.2, 5, 3, 3);
 PID turn_pid(3, 1, 0.2, 15, 3, 3);
 Drive robot(
-	3.25, 7, 0.1, 2.25, 36, 60, 2.8,
+	3.25, 7, 0.1, 2.25, 36, 48, 2,
 	front_left, middle_left, back_left, front_right, middle_right, back_right, inertial, vertical, horizontal,
 	controller, drive_pid_IME, drive_pid, turn_pid
 );
@@ -204,7 +204,7 @@ void print_odom() {
 // >>>>>>> 2d648702d6b4fa138a9758c030fb603fd77a9afb
         controller.print(2, 14, "   %0.2f°  ", robot.get_heading());
         pros::delay(50);
-		printf("Hopper: %d\n", hopper.get_voltage());
+		// printf("Hopper: %d\n", hopper.get_voltage());
 	}
 }
 

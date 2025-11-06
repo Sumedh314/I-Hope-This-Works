@@ -110,7 +110,7 @@ void blue_left() {
 	robot.set_original_heading(90);
 
 // <<<<<<< HEAD
-	robot.drive_to_point(-24, -24);
+	robot.drive_to_point(-24, -30);
 
 	// // Score preload on the alliance stake.
 	// robot.drive_distance(-16);
