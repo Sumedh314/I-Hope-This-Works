@@ -243,6 +243,7 @@ void Drive::drive_to_point(double target_x, double target_y, int direction, doub
         pros::delay(10);
     }
     turn_pid.compute(100);
+    brake();
 }
 
 /**

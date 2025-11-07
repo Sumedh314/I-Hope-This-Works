@@ -43,11 +43,23 @@ void spin_intake() {
 	}
 }
 
-void intake_on(double voltage) {
-	while (true){
-		intake.move(voltage);
-		hopper.move(voltage);
+
+
+void midtier_on(double voltage){
+	while(true){
+		hopper.move(-127);
+		intake.move(127);
+		redirect.move(127);
 	}
+
+}
+
+
+void intake_on(double voltage) {
+	intake.move(voltage);
+	hopper.move(voltage);
+	
+
 
 }
 

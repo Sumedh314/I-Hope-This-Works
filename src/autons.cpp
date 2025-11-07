@@ -106,11 +106,41 @@ void blue_left() {
 	// Set original pose of the robot.
 
 	//y, x
-	robot.set_coordinates(-24, -72);
+	robot.set_coordinates(-12,-47);
+
 	robot.set_original_heading(90);
 
-// <<<<<<< HEAD
-	robot.drive_to_point(-24, -30);
+	intake_on();
+
+
+
+
+
+	robot.drive_to_point(-24,-35,0,30);
+	robot.turn_to_heading(90);
+
+	pros::delay(200);
+	//Drive while intake is running
+  	robot.drive_to_point(-24, -30);
+
+	/*pros::delay(200);
+	robot.drive_to_point(-24, -35);*/
+
+
+	// Stop intake when done
+
+	//score on midtier
+	/*intake_off();
+	robot.turn_to_point(0,0);
+	robot.drive_distance(3);*/
+	
+
+	/*pros::delay(50);
+	pros::Task midtier_task([] {
+		midtier_on();
+	});
+
+	intake_off();*/
 
 	// // Score preload on the alliance stake.
 	// robot.drive_distance(-16);
