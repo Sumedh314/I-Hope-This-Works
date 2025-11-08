@@ -158,14 +158,14 @@ void Drive::drive_distance_with_IME(double target, double max_voltage, double ma
 void Drive::drive_distance(double target, double max_voltage) {
 
     // Get the original position of the encoder in degrees.
-    double original_position = -vertical.get_position() / 100;
+    double original_position = vertical.get_position() / 100;
 
     // Keep going until the robot if settled, either by reaching the desired distance or by getting stuck for too long.
     while (!drive_pid.is_settled()) {
 
         // Get the current error in inches and feed it into the PID controller. Looks at the difference in the current
         // position and the original position and converts that to inches.
-        double current_position = (-vertical.get_position() / 100 - original_position) * TRACKING_WHEEL_DIAMETER * pi / 360;
+        double current_position = (vertical.get_position() / 100 - original_position) * TRACKING_WHEEL_DIAMETER * pi / 360;
         double error = target - current_position;
         double voltage = drive_pid.compute(error);
 
@@ -175,6 +175,8 @@ void Drive::drive_distance(double target, double max_voltage) {
 
         // Output voltages and delay for next loop.
         set_drive_voltages(voltage);
+        printf("Error: %f\n", error);
+        printf("Voltage: %f\n", voltage);
         pros::delay(100);
     }
 

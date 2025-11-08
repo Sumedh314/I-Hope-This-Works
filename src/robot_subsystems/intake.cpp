@@ -46,12 +46,9 @@ void spin_intake() {
 
 
 void midtier_on(double voltage){
-	while(true){
-		hopper.move(-127);
-		intake.move(127);
-		redirect.move(127);
-	}
-
+	hopper.move(-127);
+	intake.move(127);
+	redirect.move(127);
 }
 
 

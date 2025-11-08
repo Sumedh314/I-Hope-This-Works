@@ -106,41 +106,56 @@ void blue_left() {
 	// Set original pose of the robot.
 
 	//y, x
-	robot.set_coordinates(-12,-47);
+	robot.set_coordinates(-13.5, -47.5);
 
 	robot.set_original_heading(90);
 
 	intake_on();
 
 
+	// pros::delay(100);
+
+	robot.drive_to_point(-20, -33, 0, 60);
+	pros::delay(1500);
+	robot.drive_distance(4, 30);
+	pros::delay(1000);
+	robot.drive_distance(7, 30);
+	pros::delay(1000);
+	intake_off();
+	// robot.turn_and_drive_to_point(-15, -14, 1, 1);
+	robot.turn_to_heading(38);
+	robot.drive_distance(15.5);
+	// robot.drive_distance(18);
+	midtier_on();
+	pros::delay(10000);
+	intake_off();
+	// robot.turn_to_heading(90);
+
+	// pros::delay(100);
+	// //Drive while intake is running
+  	// robot.drive_to_point(-24, -30);
+	// pros::delay(100);
+  	// robot.drive_to_point(-24, -25);
+
+	// pros::delay(100);
+	// robot.drive_to_point(-24, -35);
 
 
+	// // Stop intake when done
+	// pros::delay(100);
+	// //score on midtier
+	// robot.turn_and_drive_to_point(-10,-10);
+	// pros::delay(100);
+	// intake_off();
 
-	robot.drive_to_point(-24,-35,0,30);
-	robot.turn_to_heading(90);
-
-	pros::delay(200);
-	//Drive while intake is running
-  	robot.drive_to_point(-24, -30);
-
-	/*pros::delay(200);
-	robot.drive_to_point(-24, -35);*/
-
-
-	// Stop intake when done
-
-	//score on midtier
-	/*intake_off();
-	robot.turn_to_point(0,0);
-	robot.drive_distance(3);*/
 	
 
-	/*pros::delay(50);
-	pros::Task midtier_task([] {
-		midtier_on();
-	});
+	// pros::delay(50);
+	// pros::Task midtier_task([] {
+	// 	midtier_on();
+	// });
 
-	intake_off();*/
+	// intake_off();
 
 	// // Score preload on the alliance stake.
 	// robot.drive_distance(-16);
