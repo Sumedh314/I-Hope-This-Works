@@ -175,7 +175,9 @@ void Drive::drive_distance(double target, double max_voltage) {
 
         // Output voltages and delay for next loop.
         set_drive_voltages(voltage);
-        pros::delay(10);
+        printf("Error: %f\n", error);
+        printf("Voltage: %f\n", voltage);
+        pros::delay(100);
     }
 
     // Make sure robot doesn't continue moving.
@@ -239,9 +241,11 @@ void Drive::drive_to_point(double target_x, double target_y, int direction, doub
 
         // Move the robot and delay for next loop.
         set_drive_voltages(drive_voltage - turn_voltage, drive_voltage + turn_voltage);
+        printf("Error: %f\n", lateral_error);
         pros::delay(10);
     }
     turn_pid.compute(100);
+    brake();
 }
 
 /**
@@ -493,7 +497,7 @@ void Drive::update_odometry() {
         std::uint32_t start = pros::millis();
 
         // Find out how the robot changed from the previous loop.
-        double current_vertical = -vertical.get_position() / 100;
+        double current_vertical = vertical.get_position() / 100;
         double vertical_distance = (current_vertical - prev_vertical) * TRACKING_WHEEL_DIAMETER * pi / 360;
         double current_horizontal = horizontal.get_position() / 100;
         double horizontal_distance = (current_horizontal - prev_horizontal) * TRACKING_WHEEL_DIAMETER * pi / 360;
@@ -535,7 +539,7 @@ void Drive::update_odometry() {
 /**
  * Odometry using IMU acceleration.
  */
-// void Drive::IMU_odometry() {
+void Drive::IMU_odometry() {
 //     double x_jerk = 0;
 //     double x_accel = 0;
 //     double prev_x_accel = 0;
@@ -624,7 +628,7 @@ void Drive::update_odometry() {
 //         prev_x_vel = x_vel;
 //         pros::Task::delay_until(&start, 20);
 //     }
-// }
+}
 
 /**
  * Resets odometry using distance sensor.
