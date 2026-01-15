@@ -6,9 +6,7 @@
 #include "robot_subsystems/robot-config.hpp"
 void red_left() {
 
-	// Set original pose of the robot.
-	robot.set_coordinates(0,0);
-	robot.set_original_heading(90);
+	// not used
 }
 
 void blue_right() {
@@ -40,11 +38,7 @@ void blue_right() {
 
 void red_right() {
 
-	// Set original pose of the robot.
-	robot.set_coordinates(11.5, -62.5);
-	robot.set_original_heading(0);
-
-	robot.drive_distance_with_IME(10);
+	// not used
 }
 
 void blue_left() {
