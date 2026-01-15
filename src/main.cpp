@@ -82,58 +82,53 @@ void disabled() {
  * starts.
  */
 void competition_initialize() {
+    // Keep selecting until the match enables the robot.
+    while (pros::competition::is_disabled()) {
 
-	// Uses the limit switch to choose an autonomous routine. This is better than having separate programs for each
-	// autonomous routine because we don't have to manage multiple programs.
-	while (true) {
+        if (auton_index == sizeof(autons) / sizeof(const char*)) {
+            pros::lcd::print(0, "Auton will do nothing.");
+            controller.print(0, 0, "Auton: nothing");
+        } else {
+            pros::lcd::print(0, "Auton: %s", autons[auton_index]);
+            controller.print(0, 0, "Auton: %s", autons[auton_index]);
+        }
 
-		// Auton will do nothing if auton_index is equal to the length of autons.
-		if (auton_index == sizeof(autons) / sizeof(const char*)) {
-			pros::lcd::print(0, "Auton will do nothing.");
-			controller.print(0, 0, "Auton: nothing");
-		}
+        while (auton_select.get_value() == LOW) {
+            if (!pros::competition::is_disabled()) return;
+            pros::delay(50);
+        }
 
-		// Choose one of the autons based on auton_index.
-		else {
-			pros::lcd::print(0, "Auton: %s", autons[auton_index]);
-			controller.print(0, 0, "Auton: %s", autons[auton_index]);
-		}
+        int start = pros::millis();
+        while (auton_select.get_value() == HIGH) {
+            if (!pros::competition::is_disabled()) return;
 
-		// Wait for limit switch to be pressed.
-		while (auton_select.get_value() == LOW) {
-			pros::delay(50);
-		}
+            if (pros::millis() - start > 500) {
+                pros::lcd::print(0, "Calibrating IMU...");
+                controller.print(0, 0, "Calibrating IMU...");
 
-		// Calibrate sensor if sensor is held pressed for 500 milliseconds.
-		int start = pros::millis();
-		while (auton_select.get_value() == HIGH) {
-			if (pros::millis() - start > 500) {
-				pros::lcd::print(0, "Calibrating IMU...");
-				controller.print(0, 0, "Calibrating IMU...");
+                inertial.reset(true);
 
-				inertial.reset(true);
+                pros::lcd::print(0, "Done calibrating");
+                controller.print(0, 0, "Done calibrating");
+                pros::delay(1000);
 
-				pros::lcd::print(0, "Done calibrating");
-				controller.print(0, 0, "Done calibrating");
-				pros::delay(1000);
+                auton_index--;
+                while (auton_select.get_value() == HIGH) {
+                    if (!pros::competition::is_disabled()) return;
+                    pros::delay(50);
+                }
+            }
+            pros::delay(50);
+        }
 
-				// Reduce because it will be increased after this loop while we want it to remain the same.
-				auton_index--;
-				
-				// Wait for limit switch to be released.
-				while (auton_select.get_value() == HIGH) {
-					pros::delay(50);
-				}
-			}
-			pros::delay(50);
-		}
+        auton_index++;
+        auton_index %= (sizeof(autons) / sizeof(const char*)) + 1;
+        pros::delay(50);
+    }
 
-		// Increase auton_index by one and make it loop by using modulo.
-		auton_index++;
-		auton_index %= sizeof(autons) / sizeof(const char*) + 1;
-		pros::delay(50);
-	}
 }
+
+
 
 /**
  * Runs the user autonomous code. This function will be started in its own task
@@ -250,15 +245,20 @@ void opcontrol() {
 			controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP) || controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)
 		) {
 			if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
+
+				//red left
 				auton_index = 0;
 			}
 			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
+				//red right
 				auton_index = 1;
 			}
 			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
+				//blue left
 				auton_index = 2;
 			}
 			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_X)) {
+				//blue right
 				auton_index = 3;
 			}
 			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
