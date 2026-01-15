@@ -51,10 +51,12 @@ void blue_left() {
 
 	// Set original pose of the robot.
 	//y, x
-	robot.set_coordinates(-13.5, -47.5);
-
+	robot.set_coordinates(0, 0);
 	robot.set_original_heading(90);
 
+	// Score preload on the alliance stake.
+	robot.drive_distance(2,127);
+	pros::delay(100);
 	intake_on();
 
 
