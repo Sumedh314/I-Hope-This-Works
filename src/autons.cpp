@@ -19,6 +19,7 @@ void blue_right() {
 
 	intake_on();
 
+
 	robot.drive_to_point(16, -33, 0, 60);
 	pros::delay(1500);
 	robot.drive_distance(4, 30);
@@ -71,10 +72,105 @@ void blue_left() {
 }
 
 void skills_autonomous() {
-	//skills auton
-
 	
+	// Set original pose of the robot.
+	robot.set_coordinates(0, -62.5);
+	robot.set_original_heading(90);
 
+	// Score preload on goal.
+	intake_on();
+	pros::delay(1000);
+	robot.set_drive_voltages(-127);
+	pros::delay(200);
+	robot.set_drive_voltages(127);
+	pros::delay(100);
+	robot.set_drive_voltages(-127);
+	pros::delay(400);
+
+	// Stop intake and pick up goal.
+	intake_off();
+	robot.drive_to_point(0, -48);
+	robot.turn_and_drive_to_point(15, -48, -1);
+	pros::delay(200);
+	robot.drive_distance(-10, 100);
+	pros::delay(200);
+	deploy_loader();
+	pros::delay(500);
+
+	// Start intake and attempt to pick up another ring.
+	intake_on();
+	robot.turn_and_drive_to_point(24, -20, 1);
+	pros::delay(600);
+
+	// // Pick up ring in the middle of the field.
+	// robot.turn_and_drive_to_point(0, 0);
+	// pros::delay(500);
+
+	// Pick up ring next to robot.
+	// robot.drive_to_point(48, -24);
+	robot.turn_and_drive_to_point(50, -24, 1, 1);
+	pros::delay(600);
+
+	// Pick up rings in the corner of the field.
+	robot.turn_and_drive_to_point(48, -44, 1, 1);
+	pros::delay(1500);
+	robot.drive_distance(17);
+	pros::delay(1500);
+	robot.drive_distance(-22);
+	robot.turn_to_heading(-45);
+	robot.drive_distance(15);
+	pros::delay(1500);
+
+	// Put goal in the corner
+	robot.turn_to_point(60, -60, -1);
+	undeploy_loader();
+	robot.drive_distance(-11);
+	intake_off();
+
+	// Pick up other goal on this side of the field.
+	robot.drive_distance(9);
+	robot.turn_and_drive_to_point(-13, -48, -1, -1);
+	pros::delay(200);
+	robot.drive_distance(-10, 100);
+	pros::delay(200);
+	deploy_loader();
+	pros::delay(500);
+
+	// Score ring in front of the goal.
+	intake_on();
+	robot.turn_and_drive_to_point(-24, -21, 1, 1);
+	pros::delay(800);
+
+	// Score two more rings.
+	robot.drive_to_point(-50, -24, 1);
+	pros::delay(800);
+	robot.drive_to_point(-61, 6, 1);
+	pros::delay(800);
+
+	// Score rings in the corner of the field.
+	robot.drive_to_point(-48, -25);
+	robot.turn_and_drive_to_point(-48, -45, 1, 1);
+	pros::delay(1500);
+	robot.drive_distance(15);
+	pros::delay(1500);
+	robot.drive_distance(-22);
+	robot.turn_to_heading(225);
+	robot.drive_distance(15);
+	pros::delay(1500);
+
+	// Put goal in the corner.
+	robot.turn_to_point(-60, -60, -1);
+	robot.drive_distance(-10);
+	undeploy_loader();
+	intake_off();
+ 	robot.turn_and_drive_to_point(-12, 60);
+	robot.turn_to_point(-72, -72);
+	robot.drive_to_point(-60, 60);
+	robot.drive_distance(-10);
+	robot.turn_to_heading(85);
+	robot.drive_to_point(12, 60);
+	robot.drive_to_point(60, 60);
+	robot.drive_distance(-10);
 }
 
 void drive_ten_inches() {
