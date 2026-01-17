@@ -43,15 +43,12 @@ void blue_left() {
 	pros::delay(100);
 	//robot.drive_distance(2,30);
 
-	robot.drive_to_point(0,24,1,30);
+	robot.drive_to_point(0,23,1,30);
 	pros::delay(1000);	
 	intake_on();
 	robot.turn_to_heading(180,1,30);
-	robot.drive_distance(12, 30);
-	pros::delay(1000);
-	intake_off();
-	robot.drive_distance(1,30);
-	intake_on();
+	robot.drive_distance(13, 20);
+	pros::delay(1000);;
 	robot.drive_distance(-4,30);
 	robot.drive_distance(11, 30);
 	pros::delay(1000);
