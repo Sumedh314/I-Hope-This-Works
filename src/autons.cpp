@@ -4,21 +4,17 @@
 #include "robot_subsystems/intake.hpp"
 #include "robot_subsystems/pneumatics.hpp"
 #include "robot_subsystems/robot-config.hpp"
-void red_left() {
 
+void red_left() {
 	// not used
 }
 
 void blue_right() {
-
 	// Set original pose of the robot.
-	//y, x
 	robot.set_coordinates(13.5, -47.5);
-
-	robot.set_original_heading(90);
+	// Heading is already set to 90 in autonomous()
 
 	intake_on();
-
 
 	robot.drive_to_point(16, -33, 0, 60);
 	pros::delay(1500);
@@ -28,8 +24,7 @@ void blue_right() {
 	pros::delay(1000);
 	intake_off();
 
-	
-	robot.turn_to_point(0,0);
+	robot.turn_to_point(0, 0);
 	robot.drive_distance(15);
 	midtier_on();
 	pros::delay(10000);
@@ -37,45 +32,38 @@ void blue_right() {
 }
 
 void red_right() {
-
 	// not used
 }
 
 void blue_left() {
-
-	// Set original pose of the robot.
-	//y, x
+	// Set original pose of the robot
+	// Heading is already set to 90 in autonomous()
 	robot.set_coordinates(0, 0);
-	robot.set_original_heading(90);
 
-	// Score preload on the alliance stake.
-	robot.drive_distance(2,127);
 	pros::delay(100);
+	//robot.drive_distance(2,30);
 	intake_on();
 
-
-	robot.drive_to_point(-19, -33, 0, 60);
-	pros::delay(1500);
-	robot.drive_distance(4, 30);
+	robot.drive_to_point(0,25,0,30);
 	pros::delay(1000);
-	robot.drive_distance(9, 30);
+	robot.turn_to_heading(180,0,30);
+	robot.drive_distance(12, 30);
+	pros::delay(1000);
+	robot.drive_distance(8, 30);
 	pros::delay(1000);
 	intake_off();
+	robot.turn_to_heading(135);
 
-	
-	robot.turn_to_point(0,0);
-	robot.drive_distance(15.5);
-	midtier_on();
-	pros::delay(10000);
-	intake_off();
-
+	// robot.drive_distance(15.5);
+	// midtier_on();
+	// pros::delay(10000);
+	// intake_off();
 }
 
 void skills_autonomous() {
-	
 	// Set original pose of the robot.
 	robot.set_coordinates(0, -62.5);
-	robot.set_original_heading(90);
+	// Heading is already set to 90 in autonomous()
 
 	// Score preload on goal.
 	intake_on();
@@ -102,12 +90,7 @@ void skills_autonomous() {
 	robot.turn_and_drive_to_point(24, -20, 1);
 	pros::delay(600);
 
-	// // Pick up ring in the middle of the field.
-	// robot.turn_and_drive_to_point(0, 0);
-	// pros::delay(500);
-
 	// Pick up ring next to robot.
-	// robot.drive_to_point(48, -24);
 	robot.turn_and_drive_to_point(50, -24, 1, 1);
 	pros::delay(600);
 
@@ -134,7 +117,6 @@ void skills_autonomous() {
 	robot.drive_distance(-10, 100);
 	pros::delay(200);
 	deploy_loader();
-	pros::delay(500);
 
 	// Score ring in front of the goal.
 	intake_on();
@@ -163,7 +145,7 @@ void skills_autonomous() {
 	robot.drive_distance(-10);
 	undeploy_loader();
 	intake_off();
- 	robot.turn_and_drive_to_point(-12, 60);
+	robot.turn_and_drive_to_point(-12, 60);
 	robot.turn_to_point(-72, -72);
 	robot.drive_to_point(-60, 60);
 	robot.drive_distance(-10);

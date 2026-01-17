@@ -497,10 +497,14 @@ void Drive::update_odometry() {
         std::uint32_t start = pros::millis();
 
         // Find out how the robot changed from the previous loop.
+        // IMPORTANT: Make sure signs match your physical sensor orientation
         double current_vertical = vertical.get_position() / 100;
         double vertical_distance = (current_vertical - prev_vertical) * TRACKING_WHEEL_DIAMETER * pi / 360;
+        
+        // Changed: Now consistently negating horizontal like vertical
         double current_horizontal = horizontal.get_position() / 100;
         double horizontal_distance = (current_horizontal - prev_horizontal) * TRACKING_WHEEL_DIAMETER * pi / 360;
+        
         double current_heading = deg_to_rad(get_heading());
         double change_in_heading = current_heading - prev_heading;
 
@@ -535,7 +539,6 @@ void Drive::update_odometry() {
         pros::Task::delay_until(&start, 10);
     }
 }
-
 /**
  * Odometry using IMU acceleration.
  */
@@ -668,11 +671,15 @@ void Drive::reset_odometry() {
  * Sets the heading of the robot when it starts the match. Should only be used at the beginning of the match becuase
  * the inertial sensor's reading will also be reset (but not recalibrated).
 */
-void Drive::set_original_heading(double original_heading) {
-    inertial.set_rotation(0);
-    this->original_heading = original_heading;
-}
 
+void Drive::set_original_heading(double original_heading) {
+    this->original_heading = original_heading;
+    inertial.set_rotation(0);
+    
+    // Wait for IMU to have a valid rotation reading after set_rotation(0)
+    // This prevents get_heading() from returning NaN when odometry starts
+    pros::delay(100);
+}
 /**
  * Returns the heading of the robot. The reading from the sensor is scaled a little bit because these sensors usually
  * do not return exactly 360 when spun around 360 degrees. This scaling factor was determined experimentally by

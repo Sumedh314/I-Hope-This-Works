@@ -56,8 +56,6 @@ void intake_on(double voltage) {
 	intake.move(voltage);
 	hopper.move(voltage);
 	
-
-
 }
 
 void intake_off() {

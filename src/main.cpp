@@ -8,7 +8,7 @@
 
 // Create PID and drivetrain objects used for the rest of the code.
 PID drive_pid_IME(20.5, 0, 1.7, 10, 1, 1);
-PID drive_pid(8, 0, 0.08, 5, 3, 3);
+PID drive_pid(7, 0, 0.08, 5, 3, 3);
 PID turn_pid(2.8, 1, 0.2, 15, 3, 3);
 Drive robot(
 	3.25, 7, 0.25, 2, 36, 48, 2,
@@ -142,15 +142,21 @@ void competition_initialize() {
  * from where it left off.
  */
 void autonomous() {
-
-	// Start odometry tasks.
+	
+	// CRITICAL: Set heading and reset tracking wheels BEFORE starting odometry
+	robot.set_original_heading(90);
+	vertical.reset_position();
+	horizontal.reset_position();
+	
+	// Wait for sensors to stabilize
+	pros::delay(100);
+	
+	// NOW start odometry tasks
 	pros::Task odom([](){robot.update_odometry();});
 	pros::Task print(print_odom);
 	pros::delay(100);
 
-	// Move wall stake mech up a little so the hood can move.
-
-	// Execute the correct autonomous routine based on what was chosen in the competition_initialize() function.
+	// Execute the correct autonomous routine
 	switch (auton_index) {
 		case 0:
 			red_left();
@@ -176,7 +182,6 @@ void autonomous() {
 
 	auton_happened = true;
 }
-
 /**
  * Continuously prints odometry information to the controller.
 */
