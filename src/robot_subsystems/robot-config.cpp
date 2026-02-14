@@ -31,3 +31,6 @@ pros::Controller controller(pros::E_CONTROLLER_MASTER);
 pros::adi::DigitalOut match_loader(8);
 pros::adi::DigitalOut chute(6);
 pros::adi::DigitalOut descore(7);
+
+//limit switch for chute
+pros::adi::DigitalIn limit_switch(4);

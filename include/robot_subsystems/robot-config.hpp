@@ -37,3 +37,5 @@ extern pros::adi::DigitalOut match_loader;
 extern pros::adi::DigitalOut chute;
 extern pros::adi::DigitalOut descore;
 
+//limit switch
+extern pros::adi::DigitalIn limit_switch;  // ADD THIS

@@ -22,6 +22,7 @@ void spin_intake() {
 
 		else {
 			intake.move(0);
+			scoring_arm.move(0);
 			scoring_arm.brake();
 			intake.brake();
 		}
@@ -30,9 +31,19 @@ void spin_intake() {
 }
 
 
-void deploy_scorer(){
-    scoring_arm.move_relative(180,127);
-	scoring_arm.move_relative(-180,127);
+void deploy_scorer() {
+    int timeout = 0;
+    const int MAX_TIMEOUT = 200;  
+    
+    while (limit_switch.get_value() == LOW && timeout < MAX_TIMEOUT) {
+        scoring_arm.move(127);
+        pros::delay(10);
+        timeout++;
+    }
+    
+    scoring_arm.move(0);  
+	scoring_arm.brake();
+    
 
 }
 
