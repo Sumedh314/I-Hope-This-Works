@@ -9,10 +9,16 @@
  * information about electronics it uses, and PID objects. Sets the initial position to (0, 0).
 */
 Drive::Drive(
-    const double DRIVE_WHEEL_DIAMETER, const double TRACK_WIDTH, const double LEFT_OFFSET, const double HORIZONTAL_OFFSET,
-    const double MOTOR_GEAR_TEETH, const double WHEEL_GEAR_TEETH, const double TRACKING_WHEEL_DIAMETER, pros::Motor& front_left,
-    pros::Motor& middle_left, pros::Motor& back_left, pros::Motor& front_right, pros::Motor& middle_right, pros::Motor& back_right,
-    pros::IMU& inertial, pros::Rotation& vertical, pros::Rotation& horizontal, pros::Controller& controller,
+    const double DRIVE_WHEEL_DIAMETER, const double TRACK_WIDTH, 
+    const double LEFT_OFFSET, const double HORIZONTAL_OFFSET,
+    const double MOTOR_GEAR_TEETH, const double WHEEL_GEAR_TEETH, 
+    const double TRACKING_WHEEL_DIAMETER, 
+    pros::Motor& front_left, pros::Motor& middle_left, pros::Motor& back_left, 
+    pros::Motor& front_right, pros::Motor& middle_right, pros::Motor& back_right,
+    pros::IMU& inertial, 
+    pros::Rotation& vertical, pros::Rotation& horizontal,
+    pros::Gps& gps1, pros::Gps& gps2, 
+    pros::Controller& controller,
     PID drive_pid_IME, PID drive_pid, PID turn_pid
 ) :
     DRIVE_WHEEL_DIAMETER(DRIVE_WHEEL_DIAMETER),
@@ -22,6 +28,8 @@ Drive::Drive(
     MOTOR_GEAR_TEETH(MOTOR_GEAR_TEETH),
     WHEEL_GEAR_TEETH(WHEEL_GEAR_TEETH),
     TRACKING_WHEEL_DIAMETER(TRACKING_WHEEL_DIAMETER),
+    gps1(gps1),  // GPS first (matches class declaration order)
+    gps2(gps2),
     front_left(front_left),
     middle_left(middle_left),
     back_left(back_left),
@@ -37,6 +45,9 @@ Drive::Drive(
     turn_pid(turn_pid),
     Point(0, 0)
 {}
+
+
+
 
 /**
  * Sets the voltages of the drivetrain motors. the PROS motor.move() function takes in a value from -127 to 127 and
@@ -65,6 +76,7 @@ void Drive::set_drive_voltages(double voltage) {
 void Drive::brake() {
     set_drive_voltages(0);
 }
+
 
 /**
  * Controls the robot with the controller using split arcade control. In this control, the left joystick makes the
@@ -503,7 +515,7 @@ void Drive::update_odometry() {
         
         // Changed: Now consistently negating horizontal like vertical
         double current_horizontal = horizontal.get_position() / 100;
-        double horizontal_distance = (current_horizontal - prev_horizontal) * TRACKING_WHEEL_DIAMETER * pi / 360;
+        double horizontal_distance = (current_horizontal - prev_horizontal) * TRACKING_WHEEL_DIAMETER * pi / 360; 
         
         double current_heading = deg_to_rad(get_heading());
         double change_in_heading = current_heading - prev_heading;
@@ -536,6 +548,16 @@ void Drive::update_odometry() {
         // Using delay_until() to ensure exactly 10 milliseconds for each iteration instead of 10 milliseconds between
         // iterations. For example, if this loop took 2 milliseconds to run, it would only wait 8 milliseconds before
         // the next loop instead of 10. This is to make it more consistent.
+        pros::Task::delay_until(&start, 10);
+    }
+}
+
+void Drive::update_odometry_with_gps() {
+    while (true) {
+        std::uint32_t start = pros::millis();
+        // Get GPS position
+        double heading;
+        get_averaged_gps_position(x, y, heading);  // Directly update x, y from GPS
         pros::Task::delay_until(&start, 10);
     }
 }
@@ -680,6 +702,12 @@ void Drive::set_original_heading(double original_heading) {
     // This prevents get_heading() from returning NaN when odometry starts
     pros::delay(100);
 }
+
+void Drive::set_heading_from_gps(double gps_heading) {
+    // Calculate what original_heading should be to match GPS
+    double current_imu = inertial.get_rotation() * 3600 / 3595;
+    this->original_heading = gps_heading + current_imu;
+}
 /**
  * Returns the heading of the robot. The reading from the sensor is scaled a little bit because these sensors usually
  * do not return exactly 360 when spun around 360 degrees. This scaling factor was determined experimentally by
@@ -687,4 +715,136 @@ void Drive::set_original_heading(double original_heading) {
 */
 double Drive::get_heading() {
     return original_heading - inertial.get_rotation() * 3600 / 3595;
+}
+
+void Drive::get_averaged_gps_position(double& x, double& y, double& heading) {
+    // Get positions from all three GPS sensors
+    double x1 = gps1.get_position().x * 39.3701;  // meters to inches
+    double y1 = gps1.get_position().y * 39.3701;
+    double h1 = gps1.get_heading();
+    
+    double x2 = gps2.get_position().x * 39.3701;  // meters to inches
+    double y2 = gps2.get_position().y * 39.3701;
+    double h2 = gps2.get_heading();
+
+    // Simple average
+    x = (x1 + x2) / 2.0;
+    y = (y1 + y2) / 2.0;
+    heading = (h1 + h2) / 2.0;
+
+}
+
+
+
+void Drive::gps_drive_to_point(double target_x, double target_y, int direction, double max_drive_voltage, double max_turn_voltage, double turn_limit) {
+    double turn_voltage = 0;
+    // Make the target a Point object.
+    Point target(target_x, target_y);
+
+    // Keep going until the robot is settled, either by reaching the desired point or by getting stuck for too long.
+    while (!drive_pid.is_settled()) {
+        
+        double current_x, current_y, current_heading;
+        get_averaged_gps_position(current_x, current_y, current_heading);
+        
+        // Calculate errors using GPS position
+        double lateral_error = sqrt(pow(target_x - current_x, 2) + 
+                                   pow(target_y - current_y, 2));
+        
+        double turn_error = reduce_negative_180_to_180(
+            rad_to_deg(atan2(target_y - current_y, target_x - current_x) - 
+            deg_to_rad(gps1.get_heading()))  // Use GPS heading too
+        );
+
+        // Reverse turning and driving so the robot drives backwards if the back of the robot is facing the target.
+        if ((fabs(turn_error) > 90 || direction == -1) && direction != 1) {
+            lateral_error *= -1;
+            turn_error -= 180 * sign(turn_error);
+        }
+
+        // Use the PID class to get the voltages.
+        double drive_voltage = drive_pid.compute(lateral_error);
+
+        // Only calculate turn voltage if the lateral error is large. This is to help prevent the robot turning a lot
+        // near the end.
+        if (fabs(lateral_error) > turn_limit) {
+            turn_voltage = turn_pid.compute(turn_error);
+        }
+        else {
+            turn_voltage = 0;
+        }
+
+        // Scale the drive voltage to be smaller based on how much the robot is facing the target. This way, the robot
+        // will drive forward slower if it is not directly facing the point.
+        drive_voltage *= cos(deg_to_rad(turn_error));
+        if (fabs(turn_error) > 90) {
+            drive_voltage = 0;
+        }
+
+        // Keep the voltages within the limits given by the parameters.
+        drive_voltage = clamp(drive_voltage, max_drive_voltage);
+        turn_voltage = clamp(turn_voltage, max_turn_voltage);
+
+        // Prevent the sum of drive_voltage and turn_voltage from being greater than the maximum allowed voltage.
+        if (fabs(drive_voltage) + fabs(turn_voltage) > 127) {
+
+            // Essentially the same as drive_voltage = 127 - turn_voltage, but accounts for sign changes.
+            drive_voltage = (127 - fabs(turn_voltage)) * sign(drive_voltage);
+        }
+
+        // Move the robot and delay for next loop.
+        set_drive_voltages(drive_voltage - turn_voltage, drive_voltage + turn_voltage);
+        printf("Error: %f\n", lateral_error);
+        pros::delay(10);
+    }
+
+    turn_pid.compute(100);
+    brake();
+}
+
+void Drive::gps_turn_to_point(double target_x, double target_y, int direction, double max_voltage) {
+
+    Point target(target_x, target_y);
+
+    while (!turn_pid.is_settled()) {
+
+        // Get GPS position, but use IMU heading
+        double current_x, current_y, current_heading_unused;
+        get_averaged_gps_position(current_x, current_y, current_heading_unused);
+        
+        // Use IMU heading instead (more stable)
+        double current_heading = get_heading();
+
+        // Calculate angle to target
+        double error = reduce_negative_180_to_180(
+            rad_to_deg(atan2(target_y - current_y, target_x - current_x)) - current_heading
+        );
+
+        if ((fabs(error) > 90 || direction == -1) && direction != 1) {
+            error -= 180 * sign(error);
+        }
+
+        double voltage = turn_pid.compute(error);
+        voltage = clamp(voltage, max_voltage);
+
+        set_drive_voltages(-voltage, voltage);
+        printf("Turn Error: %.2f, Voltage: %.2f\n", error, voltage);  // Debug
+        pros::delay(10);
+    }
+
+    brake();
+}
+
+
+void Drive::turn_to_goal(){
+    while(true){
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_X)) {
+            double current_heading = get_heading();
+            double target_heading = current_heading + 180;
+
+            // Turn to new heading
+            turn_to_heading(target_heading);
+
+    }
+}
 }

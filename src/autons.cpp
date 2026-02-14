@@ -9,26 +9,16 @@ void red_left() {
 	// not used
 }
 
+void gps_reset() {
+	double x, y, heading;
+	
+	robot.get_averaged_gps_position(x,y,heading);
+	robot.set_coordinates(x,y);
+}
+
 void blue_right() {
-	// Set original pose of the robot.
-	robot.set_coordinates(13.5, -47.5);
-	// Heading is already set to 90 in autonomous()
 
-	intake_on();
-
-	robot.drive_to_point(16, -33, 0, 60);
-	pros::delay(1500);
-	robot.drive_distance(4, 30);
-	pros::delay(1000);
-	robot.drive_distance(10, 30);
-	pros::delay(1000);
-	intake_off();
-
-	robot.turn_to_point(0, 0);
-	robot.drive_distance(15);
-	midtier_on();
-	pros::delay(10000);
-	intake_off();
+	pros::delay(100);
 }
 
 void red_right() {
@@ -36,29 +26,27 @@ void red_right() {
 }
 
 void blue_left() {
-	// Set original pose of the robot
-	// Heading is already set to 90 in autonomous()
-	robot.set_coordinates(0, 0);
 
 	pros::delay(100);
-	//robot.drive_distance(2,30);
 
-	robot.drive_to_point(0,23,1,30);
-	pros::delay(1000);	
+	robot.gps_drive_to_point(-18, 6,0,40);
+	pros::delay(100);
 	intake_on();
 	robot.turn_to_heading(180,1,30);
-	robot.drive_distance(13, 20);
-	pros::delay(1000);;
-	robot.drive_distance(-4,30);
-	robot.drive_distance(11, 30);
+	pros::delay(100);
+	robot.drive_distance(13, 15);
 	pros::delay(1000);
-	robot.turn_to_point(60, 115, 1); 
+	robot.drive_distance(-4,40);
+	robot.turn_to_heading(165);
+	pros::delay(200);
+	robot.drive_distance(11, 20);
+	pros::delay(200);
+	robot.turn_to_heading(38,0);
+	pros::delay(200);
 	intake_off();
-                                                                                                                                                                                                                                                                                                                                     
-	robot.drive_distance(14.5);
-	midtier_on(60);
-	pros::delay(10000);
-	intake_off();
+	pros::delay(200);
+	robot.drive_distance(-14.5);
+
 }
 
 void skills_autonomous() {

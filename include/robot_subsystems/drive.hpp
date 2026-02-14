@@ -22,6 +22,8 @@ class Drive : public Point{
     double original_heading;
 
     // The hardware used in this drivetrain.
+    pros::Gps& gps1;
+    pros::Gps& gps2;
     pros::Motor& front_left;
     pros::Motor& middle_left;
     pros::Motor& front_right;
@@ -42,11 +44,17 @@ class Drive : public Point{
 
     public:
         Drive(
-            const double DRIVE_WHEEL_DIAMETER, const double TRACK_WIDTH, const double LEFT_OFFSET, const double HORIZONTAL_OFFSET,
-            const double MOTOR_GEAR_TEETH, const double WHEEL_GEAR_TEETH, const double TRACKING_WHEEL_DIAMETER, pros::Motor& front_left,
-            pros::Motor& middle_left, pros::Motor& back_left, pros::Motor& front_right, pros::Motor& middle_right, pros::Motor& back_right,
-            pros::IMU& inertial, pros::Rotation& vertical, pros::Rotation& horizontal, pros::Controller& controller, PID drive_pid_IME,
-            PID drive_pid, PID turn_pid
+            const double DRIVE_WHEEL_DIAMETER, const double TRACK_WIDTH, 
+            const double LEFT_OFFSET, const double HORIZONTAL_OFFSET,
+            const double MOTOR_GEAR_TEETH, const double WHEEL_GEAR_TEETH, 
+            const double TRACKING_WHEEL_DIAMETER, 
+            pros::Motor& front_left, pros::Motor& middle_left, pros::Motor& back_left, 
+            pros::Motor& front_right, pros::Motor& middle_right, pros::Motor& back_right,
+            pros::IMU& inertial, 
+            pros::Rotation& vertical, pros::Rotation& horizontal,
+            pros::Gps& gps1, pros::Gps& gps2,  // MOVE GPS HERE (before controller)
+            pros::Controller& controller, 
+            PID drive_pid_IME, PID drive_pid, PID turn_pid
         );
         void set_drive_voltages(double left_voltage, double right_voltage);
         void set_drive_voltages(double voltage);
@@ -63,6 +71,12 @@ class Drive : public Point{
         void IMU_odometry();
         void reset_odometry();
         void set_original_heading(double original_heading);
+        void set_heading_from_gps(double gps_heading);
         double get_heading();
+        void update_odometry_with_gps();
+        void gps_drive_to_point(double target_x, double target_y, int direction=0, double max_drive_voltage=60, double max_turn_voltage=0, double turn_limit=0);
+        void get_averaged_gps_position(double& x, double& y, double& heading);
+        void gps_turn_to_point(double target_x, double target_y, int direction=0, double max_voltage=60);
+        void turn_to_goal();
 };
 #endif

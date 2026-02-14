@@ -4,62 +4,49 @@
 void spin_intake() {
     while (true) {
 
-		//high scorer stuff
+		//move intake
 		if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
-			hopper.move(-127);
 			intake.move(127);
-			redirect.move(-127);
 		}
-		//put balls in hopper
+
+		//move scoring arm
 		else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
-			hopper.move(-127);
-			intake.move(-127);
+			deploy_scorer();
 		}
 
-		//mid tier scorer
-		else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
-			hopper.move(-127);
-			intake.move(127);
-			redirect.move(127);
-		}		
-
-		//hopper in
-		else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
-			intake.move(127);
-			hopper.move(127);
-
+		//move scoring arm back
+		else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
+			undeploy_scorer();
 		}
+
 
 		else {
 			intake.move(0);
-			redirect.move(0);
-			hopper.move(0);
-
+			scoring_arm.brake();
 			intake.brake();
-			redirect.brake();
-			hopper.brake();
 		}
 		pros::delay(20);
 	}
 }
 
 
+void deploy_scorer(){
+    scoring_arm.move_relative(180,127);
+	scoring_arm.move_relative(-180,127);
 
-void midtier_on(double voltage){
-	hopper.move(-127);
-	intake.move(127);
-	redirect.move(127);
+}
+
+void undeploy_scorer(){
+	scoring_arm.move_relative(-180,127);
 }
 
 
 void intake_on(double voltage) {
 	intake.move(voltage);
-	hopper.move(voltage);
 	
 }
 
 void intake_off() {
 	intake.brake();
-	hopper.brake();
-	redirect.brake();
+
 }

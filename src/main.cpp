@@ -12,7 +12,7 @@ PID drive_pid(7, 0, 0.08, 5, 3, 3);
 PID turn_pid(2.8, 1, 0.2, 15, 3, 3);
 Drive robot(
 	3.25, 7, 0.25, 2, 36, 48, 2,
-	front_left, middle_left, back_left, front_right, middle_right, back_right, inertial, vertical, horizontal,
+	front_left, middle_left, back_left, front_right, middle_right, back_right, inertial, vertical, horizontal, gps1, gps2,
 	controller, drive_pid_IME, drive_pid, turn_pid
 );
 
@@ -57,8 +57,7 @@ void initialize() {
 	back_right.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
 
 	intake.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-	hopper.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-	redirect.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	scoring_arm.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 }
 
 /**
@@ -141,18 +140,18 @@ void competition_initialize() {
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {
+void autonomous() {	
 	
-	// CRITICAL: Set heading and reset tracking wheels BEFORE starting odometry
-	robot.set_original_heading(90);
-	vertical.reset_position();
-	horizontal.reset_position();
+
+	//using gps to reset heading, x, and y coordinates of the robot
+	gps_reset();
 	
-	// Wait for sensors to stabilize
+	//wait for sensors to stabilize
 	pros::delay(100);
-	
-	// NOW start odometry tasks
-	pros::Task odom([](){robot.update_odometry();});
+
+
+
+	pros::Task odom([](){robot.update_odometry_with_gps();});
 	pros::Task print(print_odom);
 	pros::delay(100);
 
@@ -185,12 +184,11 @@ void autonomous() {
 /**
  * Continuously prints odometry information to the controller.
 */
+
 void print_odom() {
 	while (true) {
-// <<<<<<< HEAD
         controller.print(2, 0, "(%0.2f, %0.2f)  ", robot.get_x(), robot.get_y());
 		pros::delay(50);
-// >>>>>>> 2d648702d6b4fa138a9758c030fb603fd77a9afb
         controller.print(2, 14, "   %0.2f°  ", robot.get_heading());
         pros::delay(50);
 		// printf("Hopper: %d\n", hopper.get_voltage());
@@ -240,6 +238,7 @@ void opcontrol() {
 	pros::Task spin(spin_intake);
 	pros::Task toggle(toggle_loader);
 	pros::Task vibrate_controller(dont_get_DQed);
+	pros::Task drive([](){robot.turn_to_goal();});
 
 	int start = pros::millis();
 
@@ -282,6 +281,7 @@ void opcontrol() {
 			inertial.reset();
 			pros::delay(2000);
 			robot.set_original_heading(90);
+
 
 			autonomous();
 

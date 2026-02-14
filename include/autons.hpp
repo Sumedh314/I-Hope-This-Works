@@ -9,3 +9,4 @@ void blue_left();
 void blue_right();
 void skills_autonomous();
 void drive_ten_inches();
+void gps_reset();
