@@ -8,3 +8,4 @@ void intake_off();
 void toggle_scoring_arm();
 void undeploy_scorer();
 void deploy_scorer();
+void score();

@@ -836,15 +836,15 @@ void Drive::gps_turn_to_point(double target_x, double target_y, int direction, d
 }
 
 
-void Drive::turn_to_goal(){
-    while(true){
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_X)) {
+void Drive::turn_to_goal() {
+    while (true) {
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
             double current_heading = get_heading();
             double target_heading = current_heading + 180;
-
-            // Turn to new heading
+            
             turn_to_heading(target_heading);
-
+        }
+        
+        pros::delay(20); 
     }
-}
 }

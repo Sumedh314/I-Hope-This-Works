@@ -49,6 +49,9 @@ void initialize() {
 
 	pros::lcd::register_btn1_cb(on_center_button);
 
+	gps1.initialize_full(0.0, 0.0, 0.0, 0.0, 0);
+	gps2.initialize_full(0.0, 0.0, 0.0, 0.0, 0);
+
 	front_left.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
 	middle_left.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
 	back_left.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
@@ -110,8 +113,8 @@ void competition_initialize() {
                 pros::lcd::print(0, "Done calibrating");
                 controller.print(0, 0, "Done calibrating");
                 pros::delay(1000);
-
-                auton_index--;
+                
+				auton_index--;
                 while (auton_select.get_value() == HIGH) {
                     if (!pros::competition::is_disabled()) return;
                     pros::delay(50);
@@ -121,7 +124,9 @@ void competition_initialize() {
         }
 
         auton_index++;
-        auton_index %= (sizeof(autons) / sizeof(const char*)) + 1;
+		const int auton_count = sizeof(autons) / sizeof(const char*);
+		auton_index %= auton_count;
+
         pros::delay(50);
     }
 
@@ -141,7 +146,12 @@ void competition_initialize() {
  * from where it left off.
  */
 void autonomous() {	
-	
+	// inertial.reset();
+	// while (inertial.is_calibrating()) {
+	// 	pros::delay(10);
+	//}
+
+	robot.set_original_heading(90);
 
 	//using gps to reset heading, x, and y coordinates of the robot
 	gps_reset();
@@ -235,10 +245,14 @@ void e_stop() {
  */
 void opcontrol() {
 	pros::Task drive([](){robot.split_arcade();});
+
 	pros::Task spin(spin_intake);
 	pros::Task toggle(toggle_loader);
+	//pros::Task chute(toggle_chute);
+	pros::Task goal([](){robot.turn_to_goal();});
+	pros::Task deploy(deploy_scorer);
+
 	pros::Task vibrate_controller(dont_get_DQed);
-	pros::Task drive([](){robot.turn_to_goal();});
 
 	int start = pros::millis();
 
@@ -269,11 +283,13 @@ void opcontrol() {
 				auton_index = 4;
 			}
 			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
-				auton_index = 6;
+				auton_index = 5;
 			}
 			pros::Task stop(e_stop);
-
+			
+			goal.suspend();
 			drive.suspend();
+			deploy.suspend();
 			spin.suspend();
 			toggle.suspend();
 
@@ -284,10 +300,14 @@ void opcontrol() {
 
 
 			autonomous();
-
+			
+			deploy.resume();
+			goal.resume();
 			drive.resume();
 			spin.resume();
 			toggle.resume();
+			
+
 
 			break;
 		}

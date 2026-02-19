@@ -6,12 +6,33 @@
 #include "robot_subsystems/robot-config.hpp"
 
 void red_left() {
-	// not used
+	pros::delay(100);
+
+	robot.gps_drive_to_point(-18, 6,0,40);
+	// pros::delay(100);
+	// intake_on();
+	// robot.turn_to_heading(180,1,30);
+	// pros::delay(100);
+	// robot.drive_distance(13, 15);
+	// pros::delay(1000);
+	// robot.drive_distance(-4,40);
+	// robot.turn_to_heading(165);
+	// pros::delay(200);
+	// robot.drive_distance(11, 20);
+	// pros::delay(200);
+	// robot.turn_to_heading(38,0);
+	// pros::delay(200);
+	// intake_off();
+	// pros::delay(200);
+	// robot.drive_distance(-14.5);
+	// deploy_scorer();
 }
 
 void gps_reset() {
-	double x, y, heading;
-	
+	double x = 0;
+	double y = 0;
+	double heading = 0;
+
 	robot.get_averaged_gps_position(x,y,heading);
 	robot.set_coordinates(x,y);
 }
@@ -29,7 +50,7 @@ void blue_left() {
 
 	pros::delay(100);
 
-	robot.gps_drive_to_point(-18, 6,0,40);
+	robot.drive_distance(25,40);
 	pros::delay(100);
 	intake_on();
 	robot.turn_to_heading(180,1,30);
@@ -41,11 +62,13 @@ void blue_left() {
 	pros::delay(200);
 	robot.drive_distance(11, 20);
 	pros::delay(200);
-	robot.turn_to_heading(38,0);
+	robot.turn_to_heading(40,0);
 	pros::delay(200);
+	pros::delay(200);
+	robot.drive_distance(-15);
 	intake_off();
 	pros::delay(200);
-	robot.drive_distance(-14.5);
+	score();
 
 }
 

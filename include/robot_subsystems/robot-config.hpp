@@ -38,4 +38,4 @@ extern pros::adi::DigitalOut chute;
 extern pros::adi::DigitalOut descore;
 
 //limit switch
-extern pros::adi::DigitalIn limit_switch;  // ADD THIS
+extern pros::adi::DigitalIn limit_switch; 

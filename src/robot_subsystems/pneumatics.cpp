@@ -15,24 +15,24 @@ void toggle_loader() {
 void toggle_chute(){
     bool deployed = false;
     while (true) {
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2)) {
-        chute.set_value(!deployed);
-        deployed = !deployed;
+        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)) {
+            chute.set_value(!deployed);
+            deployed = !deployed;
+        }
+        pros::delay(20);
     }
-    pros::delay(20);
-}
 }
 
-void toggle_descore(){
-    bool deployed = false;
-    while (true) {
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)) {
-        descore.set_value(!deployed);
-        deployed = !deployed;
-    }
-    pros::delay(20);
-}
-}
+// void toggle_descore(){
+//     bool deployed = false;
+//     while (true) {
+//     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)) {
+//         descore.set_value(!deployed);
+//         deployed = !deployed;
+//     }
+//     pros::delay(20);
+// }
+// }
 
 
 void deploy_chute(){
