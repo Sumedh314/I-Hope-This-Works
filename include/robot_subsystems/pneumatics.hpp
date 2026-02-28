@@ -8,6 +8,6 @@ void toggle_chute();
 void deploy_chute();
 void undeploy_chute();
 
-void toggle_descore();
+void toggle_descorer();
 void deploy_descore();
 void undeploy_descore();
