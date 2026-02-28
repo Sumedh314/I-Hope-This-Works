@@ -234,7 +234,8 @@ void opcontrol() {
 
 	pros::Task spin(spin_intake);
 	pros::Task toggle(toggle_loader);
-	//pros::Task chute(toggle_chute);
+	pros::Task chute(toggle_chute);
+	pros::Task descore(toggle_descorer);
 	pros::Task goal([](){robot.turn_to_goal();});
 	pros::Task deploy(deploy_scorer);
 
