@@ -17,7 +17,7 @@ pros::Motor scoring_arm(2, pros::v5::MotorGearset::green, pros::v5::MotorEncoder
 pros::IMU inertial(15);
 pros::adi::DigitalIn auton_select(6);
 pros::Rotation vertical(18);
-pros::Rotation horizontal(21);
+pros::Rotation horizontal(4);
 
 pros::Gps gps1(13);
 pros::Gps gps2(14);
@@ -29,9 +29,9 @@ pros::Gps gps2(14);
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
 // Pneumatics
-pros::adi::DigitalOut match_loader(8);
-pros::adi::DigitalOut chute(4);
-//pros::adi::DigitalOut descore(7);
+pros::adi::DigitalOut match_loader(5);
+pros::adi::DigitalOut chute(6);
+pros::adi::DigitalOut descore(7);
 
 //limit switch for chute
-pros::adi::DigitalIn limit_switch(7);
+pros::adi::DigitalIn limit_switch(8 );

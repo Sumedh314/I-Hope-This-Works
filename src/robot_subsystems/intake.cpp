@@ -28,9 +28,9 @@ void deploy_scorer() {
 	while (true){
 		if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
 			scoring_arm.move(-90);
-			pros::delay(750);
+			pros::delay(650);
 			scoring_arm.move(90);
-			pros::delay(750);
+			pros::delay(650);
 			scoring_arm.move(0);
 		}
 		else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)){

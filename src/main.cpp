@@ -8,10 +8,10 @@
 
 // Create PID and drivetrain objects used for the rest of the code.
 PID drive_pid_IME(20.5, 0, 1.7, 10, 1, 1);
-PID drive_pid(7, 0, 0.08, 5, 3, 3);
-PID turn_pid(2.8, 1, 0.2, 15, 3, 3);
+PID drive_pid(7, 0, 0.08, 5, 3, 3, 4000, 0.025);
+PID turn_pid(2.8, 1, 0.2, 15, 3, 3, 4000, 0.025);
 Drive robot(
-	3.25, 7, 0.25, 2, 36, 48, 2,
+	3.25, 7, 0.25, 2, 36, 48, 2.0,
 	front_left, middle_left, back_left, front_right, middle_right, back_right, inertial, vertical, horizontal, gps1, gps2,
 	controller, drive_pid_IME, drive_pid, turn_pid
 );
@@ -145,51 +145,35 @@ void competition_initialize() {
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {	
-	// inertial.reset();
-	// while (inertial.is_calibrating()) {
-	// 	pros::delay(10);
-	//}
+void autonomous() {
+    // Set heading before odometry starts
+    switch (auton_index) {
+        case 0: robot.set_original_heading(90);  break;  // red left
+        case 1: robot.set_original_heading(90);  break;  // red right
+        case 2: robot.set_original_heading(-90); break;  // blue left
+        case 3: robot.set_original_heading(-90); break;  // blue right (example)
+        case 4: robot.set_original_heading(90);  break;  // skills
+        case 5: robot.set_original_heading(90);  break;  // drive 10 inches
+    }
 
-	robot.set_original_heading(90);
+    gps_reset();
+    pros::delay(100);
 
-	//using gps to reset heading, x, and y coordinates of the robot
-	gps_reset();
-	
-	//wait for sensors to stabilize
-	pros::delay(100);
+    // start odometry after heading is set
+    pros::Task odom([](){robot.update_odometry_with_gps();});
+    pros::Task print(print_odom);
+    pros::delay(100);
 
+    switch (auton_index) {
+        case 0: red_left();   break;
+        case 1: red_right();  break;
+        case 2: blue_left();  break;
+        case 3: blue_right(); break;
+        case 4: skills_autonomous(); break;
+        case 5: drive_ten_inches(); break;
+    }
 
-
-	pros::Task odom([](){robot.update_odometry_with_gps();});
-	pros::Task print(print_odom);
-	pros::delay(100);
-
-	// Execute the correct autonomous routine
-	switch (auton_index) {
-		case 0:
-			red_left();
-			break;
-		case 1:
-			red_right();
-			break;
-		case 2:
-			blue_left();
-			break;
-		case 3:
-			blue_right();                                    
-			break;
-		case 4:
-			skills_autonomous();
-			break;
-		case 5:
-			drive_ten_inches();
-			break;
-		default:
-			break;
-	}
-
-	auton_happened = true;
+    auton_happened = true;
 }
 /**
  * Continuously prints odometry information to the controller.
@@ -197,7 +181,9 @@ void autonomous() {
 
 void print_odom() {
 	while (true) {
-        controller.print(2, 0, "(%0.2f, %0.2f)  ", robot.get_x(), robot.get_y());
+        controller.print(2, 0, "(%0.2f, %0.2f)\n ", robot.get_x(), robot.get_y());
+		printf("odometry: (%0.2f, %0.2f)\n  ", robot.get_x(), robot.get_y());
+
 		pros::delay(50);
         controller.print(2, 14, "   %0.2f°  ", robot.get_heading());
         pros::delay(50);
@@ -280,6 +266,7 @@ void opcontrol() {
 				auton_index = 3;
 			}
 			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
+				//skills
 				auton_index = 4;
 			}
 			else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
@@ -288,7 +275,7 @@ void opcontrol() {
 			pros::Task stop(e_stop);
 			
 			goal.suspend();
-			drive.suspend();
+			 drive.suspend();
 			deploy.suspend();
 			spin.suspend();
 			toggle.suspend();
@@ -296,14 +283,13 @@ void opcontrol() {
 			controller.print(2, 0, "Loading...");
 			inertial.reset();
 			pros::delay(2000);
-			robot.set_original_heading(90);
 
 
 			autonomous();
 			
 			deploy.resume();
 			goal.resume();
-			drive.resume();
+			 drive.resume();
 			spin.resume();
 			toggle.resume();
 			
